@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { addDays, format, startOfWeek } from "date-fns";
 import { base44 } from "@/api/base44Client";
 import { CalendarDays, CalendarPlus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import WeekSelector from "@/components/appointments/WeekSelector";
 import AppointmentRow from "@/components/appointments/AppointmentRow";
+import WeekCalendar from "@/components/appointments/WeekCalendar";
+import ViewToggle from "@/components/appointments/ViewToggle";
 import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
@@ -16,6 +18,7 @@ export default function Appointments() {
   const { toast } = useToast();
   const { esAdmin } = useSesion();
   const [dia, setDia] = useState(new Date());
+  const [vista, setVista] = useState("dia");
   const [turnos, setTurnos] = useState([]);
   const [pacientes, setPacientes] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -32,19 +35,29 @@ export default function Appointments() {
   const cargar = async () => {
     setCargando(true);
     try {
-      const res = await base44.entities.Turno.filter(
-        { fecha: format(dia, "yyyy-MM-dd") },
-        { sort: "hora_inicio", limit: 100 }
-      );
+      const inicioSemana = startOfWeek(dia, { weekStartsOn: 1 });
+      const consulta =
+        vista === "semana"
+          ? {
+              fecha: {
+                $gte: format(inicioSemana, "yyyy-MM-dd"),
+                $lte: format(addDays(inicioSemana, 6), "yyyy-MM-dd"),
+              },
+            }
+          : { fecha: format(dia, "yyyy-MM-dd") };
+      const res = await base44.entities.Turno.filter(consulta, { sort: "hora_inicio", limit: 300 });
       setTurnos(res.items ?? res);
     } finally {
       setCargando(false);
     }
   };
 
+  const semanaClave = format(startOfWeek(dia, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const claveCarga = vista === "semana" ? semanaClave : format(dia, "yyyy-MM-dd");
+
   useEffect(() => {
     cargar();
-  }, [dia]);
+  }, [claveCarga, vista]);
 
   const cambiarEstado = async (turno, estado) => {
     try {
@@ -96,8 +109,24 @@ export default function Appointments() {
         }
       />
 
-      <WeekSelector dia={dia} onDia={setDia} />
+      <ViewToggle vista={vista} onVista={setVista} />
 
+      {vista === "semana" && (
+        <WeekCalendar
+          dia={dia}
+          turnos={turnos}
+          cargando={cargando}
+          onDia={setDia}
+          onElegirDia={(d) => {
+            setDia(d);
+            setVista("dia");
+          }}
+        />
+      )}
+
+      {vista === "dia" && <WeekSelector dia={dia} onDia={setDia} />}
+
+      {vista === "dia" && (
       <section className="rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6">
         <h2 className="font-heading text-base font-semibold text-foreground">Turnos del {fechaLarga(dia)}</h2>
         {format(dia, "yyyy-MM-dd") === hoyISO() && (
@@ -135,6 +164,7 @@ export default function Appointments() {
           )}
         </div>
       </section>
+      )}
 
       <AppointmentFormModal
         abierto={modalAbierto}
