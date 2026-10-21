@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import BrandMark from "@/components/BrandMark";
+import AuvanceFooter from "@/components/AuvanceFooter";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function AppLayout() {
@@ -31,12 +32,13 @@ export default function AppLayout() {
         </Sheet>
       </header>
 
-      <main className="lg:pl-[260px]">
-        <div className="mx-auto w-full max-w-[1280px] px-4 pb-20 pt-24 sm:px-6 lg:px-8 lg:pt-10">
+      <main className="flex min-h-screen flex-col lg:pl-[260px]">
+        <div className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-20 pt-24 sm:px-6 lg:px-8 lg:pt-10">
           <div key={pathname} className="animate-fade-in">
             <Outlet />
           </div>
         </div>
+        <AuvanceFooter />
       </main>
     </div>
   );

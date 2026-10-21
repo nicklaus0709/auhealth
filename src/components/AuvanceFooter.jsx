@@ -2,24 +2,30 @@ export default function AuvanceFooter() {
   const anio = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto w-full">
-      <div className="bg-[linear-gradient(135deg,#1A2550_0%,#1E2D5E_50%,#1A2550_100%)] px-6 py-10">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-white shadow-lg">
-            <span className="font-heading text-xl font-extrabold text-[#1A2550]">A</span>
-          </div>
-          <p className="text-base font-semibold text-white">Auvance</p>
-          <p className="text-sm text-white/80">Automatizamos tu Progreso</p>
-        </div>
+    <footer className="mt-auto w-full bg-[#0F3D22] px-6 py-8 text-center">
+      <p className="text-sm text-white/90">
+        © {anio} AuHealth - Plataforma Digital para la Gestión Médica. Todos los derechos reservados.
+      </p>
+
+      <div className="mx-auto mt-5 flex max-w-xl items-center gap-4">
+        <span className="h-px flex-1 bg-white/20" />
+        <span className="text-[11px] font-semibold uppercase tracking-[.3em] text-white/60">Desarrollado por</span>
+        <span className="h-px flex-1 bg-white/20" />
       </div>
-      <div className="border-t border-[#E0E5EB] bg-[#F3F4F6] px-6 py-5">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-sm text-[#6C7C93]">
-            © {anio} AuHealth - Gestiona tu tiempo - Gestiona la atención al paciente.
-          </p>
-          <p className="mt-1 text-sm font-medium text-[#C9953C]">Auvance - Todos los derechos reservados</p>
-        </div>
-      </div>
+
+      <a
+        href="https://auvance.com.ar"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Auvance - auvance.com.ar"
+        className="mt-5 inline-flex items-center gap-2 text-white transition-opacity hover:opacity-80"
+      >
+        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 20 12 4l9 16" />
+          <path d="M8 20l4-7 4 7" />
+        </svg>
+        <span className="font-heading text-lg font-bold tracking-wide">AUVANCE</span>
+      </a>
     </footer>
   );
 }

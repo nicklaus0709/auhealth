@@ -1,4 +1,5 @@
-import { HeartPulse } from "lucide-react";
+import { Link } from "react-router-dom";
+import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
 
 export default function BrandMark({
@@ -11,20 +12,13 @@ export default function BrandMark({
   className,
 }) {
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <div
-        className={cn(
-          "grid shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-teal to-brand-emerald shadow-teal",
-          iconClass
-        )}
+    <Link to="/" aria-label="AuHealth - Ir al inicio" className={cn("flex items-center gap-3", className)}>
+      <img
+        src={logo}
+        alt="AuHealth"
+        className={cn("shrink-0 rounded-xl bg-white object-contain shadow-teal", iconClass)}
         style={{ width: iconSize, height: iconSize }}
-      >
-        <HeartPulse
-          className="text-white"
-          style={{ width: iconSize * 0.54, height: iconSize * 0.54 }}
-          strokeWidth={2.2}
-        />
-      </div>
+      />
       {showWordmark && (
         <div className="leading-tight">
           <span className={cn("font-heading text-lg font-bold tracking-tight", wordmarkClass)}>AuHealth</span>
@@ -35,6 +29,6 @@ export default function BrandMark({
           )}
         </div>
       )}
-    </div>
+    </Link>
   );
 }

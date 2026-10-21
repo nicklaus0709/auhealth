@@ -72,10 +72,10 @@ export default function Dashboard() {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard etiqueta="Total Pacientes" valor={stats.total} icon={Users} tono="teal" cargando={cargando} delay={0} />
-        <StatCard etiqueta="Pacientes Activos" valor={stats.activos} icon={Activity} tono="emerald" cargando={cargando} delay={80} />
-        <StatCard etiqueta="Historiales Médicos" valor={stats.historiales} icon={FileText} tono="blue" cargando={cargando} delay={160} />
-        <StatCard etiqueta="Turnos Hoy" valor={stats.turnos} icon={CalendarDays} tono="amber" cargando={cargando} delay={240} />
+        <StatCard etiqueta="Total Pacientes" valor={stats.total} icon={Users} to="/patients" tono="teal" cargando={cargando} delay={0} />
+        <StatCard etiqueta="Pacientes Activos" valor={stats.activos} icon={Activity} to="/patients" tono="emerald" cargando={cargando} delay={80} />
+        <StatCard etiqueta="Historiales Médicos" valor={stats.historiales} icon={FileText} to="/medical-records" tono="blue" cargando={cargando} delay={160} />
+        <StatCard etiqueta="Turnos Hoy" valor={stats.turnos} icon={CalendarDays} to="/appointments" tono="amber" cargando={cargando} delay={240} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">

@@ -1,5 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
-import { HeartPulse, ArrowRight, Users, FileText, CalendarDays, ShieldCheck, Smartphone, Lock } from "lucide-react";
+import { ArrowRight, Users, FileText, CalendarDays, ShieldCheck, Smartphone, Lock } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { useAuth } from "@/lib/AuthContext";
 import AuvanceFooter from "@/components/AuvanceFooter";
 import { cn } from "@/lib/utils";
@@ -44,9 +45,9 @@ export default function Landing() {
       <main className="relative z-10 flex flex-1 items-center justify-center px-5 py-16 sm:px-8">
         <div className="w-full max-w-5xl">
           <div className="flex flex-col items-center text-center">
-            <div className="animate-pulse-soft grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-brand-teal to-brand-emerald shadow-teal">
-              <HeartPulse className="h-10 w-10 text-white" strokeWidth={2.2} />
-            </div>
+            <Link to="/" aria-label="AuHealth - Ir al inicio">
+              <img src={logo} alt="AuHealth" className="animate-pulse-soft h-20 w-20 rounded-2xl bg-white object-contain shadow-teal" />
+            </Link>
 
             <h1 className="mt-7 font-heading text-[48px] font-extrabold leading-none tracking-tight sm:text-[60px]">
               <span className="text-gradient-teal">AuHealth</span>

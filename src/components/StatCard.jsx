@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const TONOS = {
@@ -7,10 +8,11 @@ const TONOS = {
   amber: "bg-brand-amber/10 text-[#B87400]",
 };
 
-export default function StatCard({ etiqueta, valor, icon: Icon, tono = "teal", cargando = false, delay = 0 }) {
+export default function StatCard({ etiqueta, valor, icon: Icon, tono = "teal", cargando = false, delay = 0, to }) {
   return (
-    <div
-      className="animate-slide-up rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow hover:shadow-soft-lg"
+    <Link
+      to={to}
+      className="block animate-slide-up rounded-2xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-soft-lg"
       style={{ animationDelay: `${delay}ms` }}
     >
       <span className={cn("grid h-11 w-11 place-items-center rounded-xl", TONOS[tono])}>
@@ -20,6 +22,6 @@ export default function StatCard({ etiqueta, valor, icon: Icon, tono = "teal", c
         {cargando ? "—" : valor}
       </p>
       <p className="mt-1.5 text-sm text-muted-foreground">{etiqueta}</p>
-    </div>
+    </Link>
   );
 }
