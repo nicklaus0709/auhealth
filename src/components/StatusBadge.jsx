@@ -7,6 +7,8 @@ const ESTILOS = {
   cancelado: "bg-brand-danger/10 text-brand-danger",
   activo: "bg-brand-emerald/10 text-[#1E8552]",
   inactivo: "bg-brand-danger/10 text-brand-danger",
+  pagado: "bg-brand-emerald/10 text-[#1E8552]",
+  parcial: "bg-brand-amber/10 text-[#B87400]",
 };
 
 const ETIQUETAS = {
@@ -16,6 +18,8 @@ const ETIQUETAS = {
   cancelado: "Cancelado",
   activo: "Activo",
   inactivo: "Inactivo",
+  pagado: "Pagado",
+  parcial: "Parcial",
 };
 
 export default function StatusBadge({ estado, className }) {

@@ -15,6 +15,7 @@ import Patients from '@/pages/Patients';
 import MedicalRecords from '@/pages/MedicalRecords';
 import Appointments from '@/pages/Appointments';
 import UserRoles from '@/pages/UserRoles';
+import Earnings from '@/pages/Earnings';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
           <Route path="/patients" element={<Patients />} />
           <Route path="/medical-records" element={<MedicalRecords />} />
           <Route path="/appointments" element={<Appointments />} />
+          <Route path="/earnings" element={<Earnings />} />
           <Route path="/user-roles" element={<UserRoles />} />
         </Route>
       </Route>

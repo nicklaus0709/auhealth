@@ -1,0 +1,109 @@
+{
+  "name": "Pago",
+  "type": "object",
+  "properties": {
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente"
+    },
+    "paciente_nombre": {
+      "type": "string"
+    },
+    "paciente_ficha": {
+      "type": "string"
+    },
+    "obra_social": {
+      "type": "string",
+      "description": "Obra social del paciente al momento del cobro"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date"
+    },
+    "concepto": {
+      "type": "string"
+    },
+    "importe": {
+      "type": "number",
+      "description": "Valor total de la prestación"
+    },
+    "monto_efectivo": {
+      "type": "number",
+      "default": 0
+    },
+    "monto_obra_social": {
+      "type": "number",
+      "default": 0
+    },
+    "monto_transferencia": {
+      "type": "number",
+      "default": 0
+    },
+    "monto_tarjeta": {
+      "type": "number",
+      "default": 0
+    },
+    "cobrado": {
+      "type": "number",
+      "default": 0,
+      "description": "Suma de los montos efectivamente cobrados"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pagado",
+        "parcial",
+        "pendiente"
+      ],
+      "default": "pendiente"
+    },
+    "facturado": {
+      "type": "boolean",
+      "default": false
+    },
+    "comprobante": {
+      "type": "string",
+      "description": "Número de factura emitida en ARCA"
+    },
+    "profesional": {
+      "type": "string",
+      "description": "Id del profesional que cobra"
+    },
+    "profesional_nombre": {
+      "type": "string"
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "paciente",
+    "fecha",
+    "importe"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

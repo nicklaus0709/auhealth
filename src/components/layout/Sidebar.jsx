@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, FileText, CalendarDays, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FileText, CalendarDays, Wallet, Shield, LogOut } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import BrandMark from "@/components/BrandMark";
 import useSesion from "@/hooks/useSesion";
@@ -10,6 +10,7 @@ const NAV = [
   { label: "Pacientes", to: "/patients", icon: Users },
   { label: "Historiales", to: "/medical-records", icon: FileText },
   { label: "Agenda", to: "/appointments", icon: CalendarDays },
+  { label: "Ganancias", to: "/earnings", icon: Wallet },
 ];
 
 export default function Sidebar({ className, onNavegar }) {
