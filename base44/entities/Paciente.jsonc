@@ -1,0 +1,99 @@
+{
+  "name": "Paciente",
+  "type": "object",
+  "properties": {
+    "numero_ficha": {
+      "type": "string",
+      "description": "N\u00famero de ficha \u00fanico con formato P000001"
+    },
+    "nombre_completo": {
+      "type": "string"
+    },
+    "dni": {
+      "type": "string"
+    },
+    "fecha_nacimiento": {
+      "type": "string",
+      "format": "date"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "obra_social": {
+      "type": "string"
+    },
+    "numero_afiliado": {
+      "type": "string"
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "contacto_emergencia": {
+      "type": "string"
+    },
+    "telefono_emergencia": {
+      "type": "string"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre_completo",
+    "dni",
+    "fecha_nacimiento"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

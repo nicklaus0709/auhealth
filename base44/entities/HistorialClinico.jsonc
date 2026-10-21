@@ -1,0 +1,119 @@
+{
+  "name": "HistorialClinico",
+  "type": "object",
+  "properties": {
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente"
+    },
+    "paciente_nombre": {
+      "type": "string"
+    },
+    "paciente_ficha": {
+      "type": "string"
+    },
+    "medico": {
+      "type": "string",
+      "description": "Id del profesional que registra la atenci\u00f3n"
+    },
+    "medico_nombre": {
+      "type": "string"
+    },
+    "fecha_atencion": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "motivo_consulta": {
+      "type": "string"
+    },
+    "diagnostico": {
+      "type": "string"
+    },
+    "tratamiento": {
+      "type": "string"
+    },
+    "notas": {
+      "type": "string"
+    },
+    "adjuntos": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tamano": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "paciente",
+    "motivo_consulta",
+    "diagnostico"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "name": "Turno",
+  "type": "object",
+  "properties": {
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente"
+    },
+    "paciente_nombre": {
+      "type": "string"
+    },
+    "paciente_ficha": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date"
+    },
+    "hora_inicio": {
+      "type": "string"
+    },
+    "hora_fin": {
+      "type": "string"
+    },
+    "tipo_consulta": {
+      "type": "string"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "confirmado",
+        "atendido",
+        "cancelado"
+      ],
+      "default": "pendiente"
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "paciente",
+    "fecha",
+    "hora_inicio",
+    "hora_fin",
+    "tipo_consulta"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

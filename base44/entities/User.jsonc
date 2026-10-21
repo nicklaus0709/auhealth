@@ -1,0 +1,23 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "nombre_completo": {
+      "type": "string",
+      "description": "Nombre y apellido del usuario"
+    },
+    "roles": {
+      "type": "array",
+      "description": "Roles asignados dentro del sistema (admin, medico, recepcionista)",
+      "items": {
+        "type": "string",
+        "enum": [
+          "admin",
+          "medico",
+          "recepcionista"
+        ]
+      },
+      "default": []
+    }
+  }
+}
