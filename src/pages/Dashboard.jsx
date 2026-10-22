@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { addDays, format, startOfMonth, endOfMonth } from "date-fns";
 import { Activity, ArrowRight, CalendarDays, DoorOpen, FileText, LayoutDashboard, Receipt, UserPlus, UserX, Users, Wallet } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import BarrasHorizontales from "@/components/dashboard/BarrasHorizontales";
+import RecordatorioBotones from "@/components/appointments/RecordatorioBotones";
 import useSesion from "@/hooks/useSesion";
 import { useMiProfesional } from "@/hooks/useDatos";
 import { METODOS, moneda, resumir } from "@/lib/earnings";
@@ -58,8 +59,10 @@ export default function Dashboard() {
       const inicioMes = format(startOfMonth(new Date()), "yyyy-MM-dd");
       const finMes = format(endOfMonth(new Date()), "yyyy-MM-dd");
       try {
-        const [turnosHoy, pacientesActivos, turnosMes, pacientesNuevos, pagosMes, atencionesMes] = await Promise.all([
+        const manana = format(addDays(new Date(), 1), "yyyy-MM-dd");
+        const [turnosHoy, turnosManana, pacientesActivos, turnosMes, pacientesNuevos, pagosMes, atencionesMes] = await Promise.all([
           base44.entities.Turno.filter({ fecha: hoy }, { sort: "hora_inicio", limit: 300 }),
+          base44.entities.Turno.filter({ fecha: manana, estado: { $in: ["pendiente", "confirmado"] } }, { sort: "hora_inicio", limit: 300 }),
           base44.entities.Paciente.count({ activo: true }),
           esAdmin ? base44.entities.Turno.filter({ fecha: { $gte: inicioMes, $lte: finMes } }, { limit: 2000 }) : [],
           esAdmin ? base44.entities.Paciente.count({ created_date: { $gte: `${inicioMes}T00:00:00` } }) : 0,
@@ -69,6 +72,7 @@ export default function Dashboard() {
         if (vivo) {
           setDatos({
             turnosHoy: lista(turnosHoy),
+            turnosManana: lista(turnosManana),
             pacientesActivos,
             turnosMes: lista(turnosMes),
             pacientesNuevos,
@@ -78,7 +82,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         log.error("No se pudo cargar el dashboard", error, { pantalla: "Dashboard" });
-        if (vivo) setDatos({ turnosHoy: [], pacientesActivos: 0, turnosMes: [], pacientesNuevos: 0, pagosMes: [], atencionesMes: 0 });
+        if (vivo) setDatos({ turnosHoy: [], turnosManana: [], pacientesActivos: 0, turnosMes: [], pacientesNuevos: 0, pagosMes: [], atencionesMes: 0 });
       }
     })();
     return () => {
@@ -170,6 +174,35 @@ export default function Dashboard() {
           </section>
         )}
       </div>
+
+      {(datos?.turnosManana || []).length > 0 && (
+        <section className="mt-6 rounded-2xl border border-border bg-card p-5 shadow-soft">
+          <h2 className="font-heading text-sm font-semibold text-foreground">
+            Recordatorios para mañana ({datos.turnosManana.filter((t) => !t.recordatorio_enviado).length} sin enviar)
+          </h2>
+          <ul className="mt-3 divide-y divide-border">
+            {datos.turnosManana.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center gap-3 py-2.5 text-sm">
+                <span className="tabular w-12 shrink-0 font-medium">{t.hora_inicio}</span>
+                <span className="min-w-0 flex-1 truncate">
+                  {t.paciente_nombre}
+                  {t.profesional_nombre && <span className="text-muted-foreground"> · {t.profesional_nombre}</span>}
+                </span>
+                <RecordatorioBotones
+                  turno={t}
+                  compacto
+                  onRecordado={(turno, medio) =>
+                    setDatos((d) => ({
+                      ...d,
+                      turnosManana: d.turnosManana.map((x) => (x.id === turno.id ? { ...x, recordatorio_enviado: new Date().toISOString(), recordatorio_medio: medio } : x)),
+                    }))
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {esAdmin && (
         <>

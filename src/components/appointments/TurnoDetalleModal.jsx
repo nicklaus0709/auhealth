@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatusBadge, { ESTADOS_TURNO } from "@/components/StatusBadge";
 import { fechaLarga } from "@/lib/format";
+import RecordatorioBotones from "@/components/appointments/RecordatorioBotones";
 
 /**
  * Detalle de un turno con las acciones encadenadas: cambiar estado, editar,
@@ -45,6 +46,8 @@ export default function TurnoDetalleModal({ turno, onOpenChange, onEstado, onEdi
             </SelectContent>
           </Select>
         </div>
+
+        {["pendiente", "confirmado"].includes(turno.estado) && <RecordatorioBotones turno={turno} />}
 
         {atendido && (
           <div className="grid gap-2 rounded-xl bg-brand-teal/5 p-3 sm:grid-cols-2">

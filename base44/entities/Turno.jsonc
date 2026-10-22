@@ -52,6 +52,15 @@
       "type": "string",
       "format": "date-time",
       "description": "Hora en que el paciente se anunció en recepción"
+    },
+    "recordatorio_enviado": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cuándo se envió el último recordatorio"
+    },
+    "recordatorio_medio": {
+      "type": "string",
+      "description": "whatsapp o email"
     }
   },
   "required": [
