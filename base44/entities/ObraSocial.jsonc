@@ -1,0 +1,97 @@
+{
+  "name": "ObraSocial",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string"
+    },
+    "sigla": {
+      "type": "string"
+    },
+    "cuit": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "obra_social",
+        "prepaga",
+        "otro"
+      ],
+      "default": "obra_social"
+    },
+    "planes": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiere_autorizacion": {
+      "type": "boolean",
+      "default": false
+    },
+    "aranceles": {
+      "type": "array",
+      "default": [],
+      "description": "Valores por prestación",
+      "items": {
+        "type": "object",
+        "properties": {
+          "prestacion": {
+            "type": "string",
+            "description": "Id de Prestacion"
+          },
+          "valor": {
+            "type": "number",
+            "description": "Lo que paga la obra social"
+          },
+          "coseguro": {
+            "type": "number",
+            "description": "Lo que paga el paciente"
+          }
+        }
+      }
+    },
+    "contacto": {
+      "type": "string"
+    },
+    "notas": {
+      "type": "string"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}

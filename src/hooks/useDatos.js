@@ -39,3 +39,29 @@ export function useRefrescar() {
   const cliente = useQueryClient();
   return (...claves) => Promise.all(claves.map((clave) => cliente.invalidateQueries({ queryKey: [clave] })));
 }
+
+export function useObrasSociales({ incluirInactivas = false } = {}) {
+  return useQuery({
+    queryKey: ["obras-sociales", incluirInactivas],
+    queryFn: async () =>
+      lista(await base44.entities.ObraSocial.filter(incluirInactivas ? {} : { activo: true }, { sort: "nombre", limit: 300 })),
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function usePrestaciones({ incluirInactivas = false } = {}) {
+  return useQuery({
+    queryKey: ["prestaciones", incluirInactivas],
+    queryFn: async () =>
+      lista(await base44.entities.Prestacion.filter(incluirInactivas ? {} : { activo: true }, { sort: "nombre", limit: 300 })),
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/** Valor que paga la obra social y coseguro del paciente para una prestación (o el precio particular). */
+export function arancelDe(obraSocial, prestacion) {
+  if (!prestacion) return { valor: 0, coseguro: 0 };
+  if (!obraSocial) return { valor: 0, coseguro: Number(prestacion.precio_particular) || 0 };
+  const a = (obraSocial.aranceles || []).find((x) => x.prestacion === prestacion.id);
+  return { valor: Number(a?.valor) || 0, coseguro: Number(a?.coseguro) || 0 };
+}

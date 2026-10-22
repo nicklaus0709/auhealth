@@ -40,6 +40,22 @@
     "activo": {
       "type": "boolean",
       "default": true
+    },
+    "obra_social_id": {
+      "type": "string",
+      "description": "Id de ObraSocial del padrón; vacío = particular"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "consentimiento_datos": {
+      "type": "boolean",
+      "default": false,
+      "description": "Aceptó el tratamiento de sus datos (Ley 25.326)"
+    },
+    "consentimiento_fecha": {
+      "type": "string",
+      "format": "date"
     }
   },
   "required": [

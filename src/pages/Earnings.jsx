@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/PageHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CajaDiaria from "@/components/earnings/CajaDiaria";
+import Liquidaciones from "@/components/earnings/Liquidaciones";
 import EmptyState from "@/components/EmptyState";
 import StatusBadge from "@/components/StatusBadge";
 import PaymentFormModal from "@/components/earnings/PaymentFormModal";
@@ -38,7 +41,7 @@ function Resumen({ etiqueta, valor, destacado = false }) {
 
 export default function Earnings() {
   const { toast } = useToast();
-  const { user, nombre } = useSesion();
+  const { user, nombre, esAdmin } = useSesion();
   const confirmar = useConfirm();
   const [params, setParams] = useSearchParams();
   const [pacienteInicial, setPacienteInicial] = useState(null);
@@ -161,6 +164,13 @@ export default function Earnings() {
         }
       />
 
+      <Tabs defaultValue="cobros">
+        <TabsList className="mb-5 flex h-auto flex-wrap justify-start">
+          <TabsTrigger value="cobros">Cobros del mes</TabsTrigger>
+          <TabsTrigger value="caja">Caja del día</TabsTrigger>
+          {esAdmin && <TabsTrigger value="liquidaciones">Liquidaciones</TabsTrigger>}
+        </TabsList>
+        <TabsContent value="cobros">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" aria-label="Mes anterior" onClick={() => setMes(addMonths(mes, -1))}>
@@ -264,6 +274,17 @@ export default function Earnings() {
           )}
         </div>
       </section>
+
+        </TabsContent>
+        <TabsContent value="caja">
+          <CajaDiaria />
+        </TabsContent>
+        {esAdmin && (
+          <TabsContent value="liquidaciones">
+            <Liquidaciones />
+          </TabsContent>
+        )}
+      </Tabs>
 
       <PaymentFormModal
         abierto={modalAbierto}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Activity, AlertTriangle, ArrowLeft, CalendarDays, FilePlus2, FileText, HeartPulse, Pencil, Plus, Printer, User, Wallet } from "lucide-react";
+import { Activity, AlertTriangle, ArrowLeft, CalendarDays, Download, FilePlus2, FileText, HeartPulse, Pencil, Plus, Printer, User, Wallet } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,7 @@ import useSesion from "@/hooks/useSesion";
 import { edad, fechaCorta, valorODash } from "@/lib/format";
 import { moneda } from "@/lib/earnings";
 import { auditar, log } from "@/lib/log";
+import { descargarJson, traerTodo } from "@/lib/exportar";
 
 function Dato({ etiqueta, valor }) {
   return (
@@ -108,6 +109,28 @@ export default function PatientDetail() {
     setParams(turno ? { turno } : {}, { replace: true });
   }, [cargando, paciente, esMedico]);
 
+  // Derecho de acceso (Ley 25.326): entrega al paciente todos sus datos en un archivo
+  const exportarDatos = async () => {
+    try {
+      const filtro = { paciente: id };
+      const [turnosTodos, pagosTodos, atenciones, notas, documentos] = await Promise.all([
+        traerTodo("Turno", filtro),
+        traerTodo("Pago", filtro),
+        esMedico ? traerTodo("HistorialClinico", filtro) : [],
+        esMedico ? traerTodo("HistorialAddenda", filtro) : [],
+        esMedico ? traerTodo("DocumentoClinico", filtro) : [],
+      ]);
+      descargarJson(
+        { generado: new Date().toISOString(), paciente, antecedentes: esMedico ? antecedentes : undefined, atenciones, notas, documentos, turnos: turnosTodos, cobros: pagosTodos },
+        `datos-${paciente.numero_ficha || paciente.id}`
+      );
+      auditar("exportar", "Paciente", { registro: id, paciente: id, usuario_nombre: nombre });
+    } catch (error) {
+      log.error("No se pudieron exportar los datos del paciente", error, { pantalla: "PatientDetail" });
+      toast({ variant: "destructive", title: "No pudimos exportar los datos" });
+    }
+  };
+
   if (cargando) {
     return (
       <div className="flex justify-center py-16">
@@ -148,13 +171,17 @@ export default function PatientDetail() {
                 paciente.numero_ficha,
                 anios !== null && `${anios} años`,
                 paciente.dni && `DNI ${paciente.dni}`,
-                paciente.obra_social && `${paciente.obra_social}${paciente.numero_afiliado ? ` · ${paciente.numero_afiliado}` : ""}`,
+                paciente.obra_social && `${paciente.obra_social}${paciente.plan ? ` ${paciente.plan}` : ""}${paciente.numero_afiliado ? ` · ${paciente.numero_afiliado}` : ""}`,
               ]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 print:hidden">
+            <Button variant="outline" onClick={exportarDatos} title="Derecho de acceso del paciente (Ley 25.326)">
+              <Download className="mr-1.5 h-4 w-4" />
+              Exportar datos
+            </Button>
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="mr-1.5 h-4 w-4" />
               Imprimir

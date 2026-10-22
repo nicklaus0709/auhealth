@@ -1,0 +1,122 @@
+{
+  "name": "Caja",
+  "type": "object",
+  "properties": {
+    "fecha": {
+      "type": "string",
+      "format": "date"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "abierta",
+        "cerrada"
+      ],
+      "default": "abierta"
+    },
+    "monto_inicial": {
+      "type": "number",
+      "default": 0
+    },
+    "gastos": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "concepto": {
+            "type": "string"
+          },
+          "monto": {
+            "type": "number"
+          },
+          "hora": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "efectivo_esperado": {
+      "type": "number"
+    },
+    "efectivo_contado": {
+      "type": "number"
+    },
+    "diferencia": {
+      "type": "number"
+    },
+    "totales": {
+      "type": "object",
+      "description": "Cobrado por medio de pago al cierre",
+      "properties": {
+        "monto_efectivo": {
+          "type": "number"
+        },
+        "monto_obra_social": {
+          "type": "number"
+        },
+        "monto_transferencia": {
+          "type": "number"
+        },
+        "monto_tarjeta": {
+          "type": "number"
+        }
+      }
+    },
+    "abierta_por": {
+      "type": "string"
+    },
+    "cerrada_por": {
+      "type": "string"
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "fecha"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": false
+  }
+}

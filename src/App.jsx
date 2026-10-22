@@ -18,6 +18,7 @@ import UserRoles from '@/pages/UserRoles';
 import Earnings from '@/pages/Earnings';
 import PatientDetail from '@/pages/PatientDetail';
 import Settings from '@/pages/Settings';
+import Reports from '@/pages/Reports';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ConfirmProvider } from '@/components/ConfirmProvider';
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/earnings" element={<Earnings />} />
           <Route path="/user-roles" element={<UserRoles />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/reports" element={<Reports />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

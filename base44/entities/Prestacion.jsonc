@@ -1,0 +1,56 @@
+{
+  "name": "Prestacion",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "Código de nomenclador, si corresponde"
+    },
+    "duracion": {
+      "type": "number",
+      "default": 30,
+      "description": "Minutos"
+    },
+    "precio_particular": {
+      "type": "number",
+      "default": 0
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}

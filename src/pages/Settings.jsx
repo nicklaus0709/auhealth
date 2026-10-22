@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, Loader2, Pencil, Plus, Settings as SettingsIcon, ShieldAlert, Stethoscope } from "lucide-react";
+import { Building2, ClipboardList, Landmark, Loader2, Pencil, Plus, Settings as SettingsIcon, ShieldAlert, Stethoscope } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import StatusBadge from "@/components/StatusBadge";
 import ProfesionalFormModal, { DIAS } from "@/components/settings/ProfesionalFormModal";
+import { ObrasSocialesSettings, PrestacionesSettings } from "@/components/settings/PadronSettings";
+import ExportarDatos from "@/components/settings/ExportarDatos";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
 import { useConsultorio, useProfesionales, useRefrescar } from "@/hooks/useDatos";
@@ -288,7 +290,7 @@ export default function Settings() {
     <div>
       <PageHeader icon={SettingsIcon} titulo="Configuración" subtitulo="Datos del consultorio y de los profesionales" />
       <Tabs defaultValue="consultorio">
-        <TabsList className="mb-5">
+        <TabsList className="mb-5 flex h-auto flex-wrap justify-start">
           <TabsTrigger value="consultorio">
             <Building2 className="mr-1.5 h-4 w-4" />
             Consultorio
@@ -297,12 +299,27 @@ export default function Settings() {
             <Stethoscope className="mr-1.5 h-4 w-4" />
             Profesionales
           </TabsTrigger>
+          <TabsTrigger value="prestaciones">
+            <ClipboardList className="mr-1.5 h-4 w-4" />
+            Prestaciones
+          </TabsTrigger>
+          <TabsTrigger value="obras">
+            <Landmark className="mr-1.5 h-4 w-4" />
+            Obras sociales
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="consultorio">
           <DatosConsultorio />
+          <ExportarDatos />
         </TabsContent>
         <TabsContent value="profesionales">
           <Profesionales />
+        </TabsContent>
+        <TabsContent value="prestaciones">
+          <PrestacionesSettings />
+        </TabsContent>
+        <TabsContent value="obras">
+          <ObrasSocialesSettings />
         </TabsContent>
       </Tabs>
     </div>

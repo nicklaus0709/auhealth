@@ -78,6 +78,29 @@
     "turno": {
       "type": "string",
       "description": "Id del Turno cobrado, si corresponde"
+    },
+    "obra_social_id": {
+      "type": "string"
+    },
+    "prestacion": {
+      "type": "string",
+      "description": "Id de Prestacion"
+    },
+    "coseguro": {
+      "type": "number",
+      "default": 0,
+      "description": "Parte que paga el paciente"
+    },
+    "numero_autorizacion": {
+      "type": "string"
+    },
+    "autorizacion_vencimiento": {
+      "type": "string",
+      "format": "date"
+    },
+    "liquidacion": {
+      "type": "string",
+      "description": "Id de la Liquidacion en que se presentó"
     }
   },
   "required": [

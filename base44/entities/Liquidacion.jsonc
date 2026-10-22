@@ -1,0 +1,72 @@
+{
+  "name": "Liquidacion",
+  "type": "object",
+  "properties": {
+    "obra_social": {
+      "type": "string",
+      "description": "Id de ObraSocial"
+    },
+    "obra_social_nombre": {
+      "type": "string"
+    },
+    "periodo": {
+      "type": "string",
+      "description": "yyyy-MM"
+    },
+    "pagos": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "cantidad": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "presentada",
+        "cobrada",
+        "observada"
+      ],
+      "default": "presentada"
+    },
+    "fecha_presentacion": {
+      "type": "string",
+      "format": "date"
+    },
+    "fecha_cobro": {
+      "type": "string",
+      "format": "date"
+    },
+    "notas": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "obra_social",
+    "periodo"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}
