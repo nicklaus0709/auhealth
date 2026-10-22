@@ -8,18 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import PacienteCombobox from "@/components/patients/PacienteCombobox";
+import { ESTADOS_TURNO } from "@/components/StatusBadge";
+import { sumarMinutos } from "@/lib/agenda";
 
-const ESTADOS = [
-  { value: "pendiente", label: "Pendiente" },
-  { value: "confirmado", label: "Confirmado" },
-  { value: "atendido", label: "Atendido" },
-  { value: "cancelado", label: "Cancelado" },
-];
+const SIN_PROFESIONAL = "__sin__";
 
-// Con `turno` el modal edita/reprograma; sin él, crea uno nuevo para `dia`.
-export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia, onGuardar, guardando }) {
+/**
+ * Con `turno` el modal edita/reprograma. Sin él, crea uno nuevo para `dia`, opcionalmente
+ * con `inicial` = { hora, profesional, paciente } (por ejemplo al hacer clic en un hueco de la grilla).
+ */
+export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia, inicial, profesionales = [], onGuardar, guardando }) {
   const [paciente, setPaciente] = useState(null);
-  const [datos, setDatos] = useState({ fecha: "", inicio: "", fin: "", tipo_consulta: "", estado: "pendiente", notas: "" });
+  const [datos, setDatos] = useState({ fecha: "", inicio: "", fin: "", profesional: "", tipo_consulta: "", estado: "pendiente", notas: "" });
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -31,17 +31,38 @@ export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia
         fecha: turno.fecha,
         inicio: turno.hora_inicio,
         fin: turno.hora_fin,
+        profesional: turno.profesional || "",
         tipo_consulta: turno.tipo_consulta || "",
         estado: turno.estado || "pendiente",
         notas: turno.notas || "",
       });
     } else {
-      setPaciente(null);
-      setDatos({ fecha: format(dia, "yyyy-MM-dd"), inicio: "09:00", fin: "09:30", tipo_consulta: "", estado: "pendiente", notas: "" });
+      const prof = inicial?.profesional || (profesionales.length === 1 ? profesionales[0] : null);
+      const inicio = inicial?.hora || "09:00";
+      setPaciente(inicial?.paciente || null);
+      setDatos({
+        fecha: inicial?.fecha || format(dia, "yyyy-MM-dd"),
+        inicio,
+        fin: sumarMinutos(inicio, prof?.duracion_turno || 30),
+        profesional: prof?.id || "",
+        tipo_consulta: "",
+        estado: "pendiente",
+        notas: "",
+      });
     }
-  }, [abierto, dia, turno]);
+  }, [abierto, dia, turno, inicial]);
 
   const set = (campo) => (e) => setDatos((previos) => ({ ...previos, [campo]: e.target.value }));
+
+  const elegirProfesional = (valor) => {
+    const prof = profesionales.find((p) => p.id === valor);
+    setDatos((p) => ({
+      ...p,
+      profesional: prof?.id || "",
+      // al cambiar de profesional, el fin se ajusta a su duración de turno
+      fin: prof && !turno ? sumarMinutos(p.inicio, prof.duracion_turno || 30) : p.fin,
+    }));
+  };
 
   const enviar = (e) => {
     e.preventDefault();
@@ -49,11 +70,15 @@ export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia
     if (!datos.fecha || !datos.inicio || !datos.fin) return setError("Completá la fecha y los horarios");
     // HH:mm se compara bien como texto
     if (datos.fin <= datos.inicio) return setError("La hora de fin debe ser posterior a la de inicio");
+    if (profesionales.length > 0 && !datos.profesional) return setError("Elegí el profesional");
     setError("");
+    const prof = profesionales.find((p) => p.id === datos.profesional);
     onGuardar({
       paciente: paciente.id,
       paciente_nombre: paciente.nombre_completo || "",
       paciente_ficha: paciente.numero_ficha || "",
+      profesional: prof?.id || "",
+      profesional_nombre: prof?.nombre_completo || "",
       fecha: datos.fecha,
       hora_inicio: datos.inicio,
       hora_fin: datos.fin,
@@ -75,6 +100,26 @@ export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia
             <Label htmlFor="turno-paciente">Paciente *</Label>
             <PacienteCombobox id="turno-paciente" seleccionado={paciente} onElegir={setPaciente} />
           </div>
+
+          {profesionales.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="turno-profesional">Profesional *</Label>
+              <Select value={datos.profesional || SIN_PROFESIONAL} onValueChange={elegirProfesional}>
+                <SelectTrigger id="turno-profesional" className="h-11">
+                  <SelectValue placeholder="Elegí el profesional" />
+                </SelectTrigger>
+                <SelectContent>
+                  {!datos.profesional && <SelectItem value={SIN_PROFESIONAL}>Elegí el profesional</SelectItem>}
+                  {profesionales.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.nombre_completo}
+                      {p.especialidad ? ` · ${p.especialidad}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
@@ -105,7 +150,7 @@ export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ESTADOS.map((estado) => (
+                {ESTADOS_TURNO.map((estado) => (
                   <SelectItem key={estado.value} value={estado.value}>
                     {estado.label}
                   </SelectItem>

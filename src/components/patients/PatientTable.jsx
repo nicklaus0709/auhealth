@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Pencil, UserX } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatusBadge from "@/components/StatusBadge";
@@ -21,11 +22,11 @@ export default function PatientTable({ pacientes, onEditar, onEliminar, esAdmin 
         <TableBody>
           {pacientes.map((paciente) => (
             <TableRow key={paciente.id}>
-              <TableCell className="font-mono text-sm font-medium text-brand-teal">
+              <TableCell className="font-mono text-sm font-medium text-brand-teal-700">
                 {valorODash(paciente.numero_ficha)}
               </TableCell>
               <TableCell>
-                <p className="font-medium text-foreground">{paciente.nombre_completo}</p>
+                <Link to={`/patients/${paciente.id}`} className="font-medium text-foreground hover:text-brand-teal-700 hover:underline">{paciente.nombre_completo}</Link>
                 <p className="text-xs text-muted-foreground">Nac. {fechaCorta(paciente.fecha_nacimiento)}</p>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">{valorODash(paciente.dni)}</TableCell>
@@ -40,7 +41,7 @@ export default function PatientTable({ pacientes, onEditar, onEliminar, esAdmin 
                     type="button"
                     aria-label="Editar paciente"
                     onClick={() => onEditar(paciente)}
-                    className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-brand-teal/10 hover:text-brand-teal"
+                    className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-brand-teal/10 hover:text-brand-teal-700"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>

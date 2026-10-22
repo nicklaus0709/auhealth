@@ -16,8 +16,11 @@ import MedicalRecords from '@/pages/MedicalRecords';
 import Appointments from '@/pages/Appointments';
 import UserRoles from '@/pages/UserRoles';
 import Earnings from '@/pages/Earnings';
+import PatientDetail from '@/pages/PatientDetail';
+import Settings from '@/pages/Settings';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { ConfirmProvider } from '@/components/ConfirmProvider';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,10 +57,12 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/patients" element={<Patients />} />
+          <Route path="/patients/:id" element={<PatientDetail />} />
           <Route path="/medical-records" element={<MedicalRecords />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/earnings" element={<Earnings />} />
           <Route path="/user-roles" element={<UserRoles />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
@@ -71,10 +76,12 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
-        </Router>
+        <ConfirmProvider>
+          <Router>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </Router>
+        </ConfirmProvider>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>

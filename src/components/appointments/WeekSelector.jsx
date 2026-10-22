@@ -13,7 +13,7 @@ export default function WeekSelector({ dia, onDia }) {
         type="button"
         aria-label="Semana anterior"
         onClick={() => onDia(addDays(inicio, -7))}
-        className="grid h-10 w-9 shrink-0 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-brand-teal"
+        className="grid h-10 w-9 shrink-0 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-brand-teal-700"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -34,13 +34,13 @@ export default function WeekSelector({ dia, onDia }) {
                   : "glass border-white/60 hover:border-brand-teal/40"
               )}
             >
-              <span className={cn("text-[11px] uppercase", elegido ? "text-brand-teal" : "text-muted-foreground")}>
+              <span className={cn("text-[11px] uppercase", elegido ? "text-brand-teal-700" : "text-muted-foreground")}>
                 {DIAS_CORTOS[d.getDay()]}
               </span>
               <span
                 className={cn(
                   "tabular mt-0.5 text-base font-semibold",
-                  elegido || hoy ? "text-brand-teal" : "text-foreground"
+                  elegido || hoy ? "text-brand-teal-700" : "text-foreground"
                 )}
               >
                 {format(d, "d")}
@@ -57,7 +57,7 @@ export default function WeekSelector({ dia, onDia }) {
         type="button"
         aria-label="Semana siguiente"
         onClick={() => onDia(addDays(inicio, 7))}
-        className="grid h-10 w-9 shrink-0 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-brand-teal"
+        className="grid h-10 w-9 shrink-0 place-items-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-brand-teal-700"
       >
         <ChevronRight className="h-4 w-4" />
       </button>

@@ -24,7 +24,7 @@ const VACIO = {
   notas: "",
 };
 
-export default function PaymentFormModal({ abierto, onOpenChange, pago, onGuardar, guardando }) {
+export default function PaymentFormModal({ abierto, onOpenChange, pago, pacienteInicial = null, onGuardar, guardando }) {
   const [datos, setDatos] = useState(VACIO);
   const [paciente, setPaciente] = useState(null);
   const [error, setError] = useState("");
@@ -34,7 +34,7 @@ export default function PaymentFormModal({ abierto, onOpenChange, pago, onGuarda
     setError("");
     // Al editar mostramos al paciente del cobro aunque hoy esté dado de baja
     setPaciente(
-      pago ? { id: pago.paciente, nombre_completo: pago.paciente_nombre, numero_ficha: pago.paciente_ficha, obra_social: pago.obra_social } : null
+      pago ? { id: pago.paciente, nombre_completo: pago.paciente_nombre, numero_ficha: pago.paciente_ficha, obra_social: pago.obra_social } : pacienteInicial
     );
     if (pago) {
       setDatos(
@@ -45,7 +45,7 @@ export default function PaymentFormModal({ abierto, onOpenChange, pago, onGuarda
     } else {
       setDatos({ ...VACIO, fecha: hoyISO() });
     }
-  }, [abierto, pago]);
+  }, [abierto, pago, pacienteInicial]);
 
   const set = (campo) => (e) => setDatos((previos) => ({ ...previos, [campo]: e.target.value }));
   const cobrado = calcularCobrado(datos);
@@ -70,6 +70,7 @@ export default function PaymentFormModal({ abierto, onOpenChange, pago, onGuarda
       facturado: datos.facturado,
       comprobante: datos.facturado ? datos.comprobante.trim() : "",
       notas: datos.notas,
+      turno: pago?.turno || paciente.turno || "",
     });
   };
 

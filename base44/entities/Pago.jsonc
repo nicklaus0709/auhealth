@@ -74,6 +74,10 @@
     },
     "notas": {
       "type": "string"
+    },
+    "turno": {
+      "type": "string",
+      "description": "Id del Turno cobrado, si corresponde"
     }
   },
   "required": [

@@ -1,16 +1,20 @@
 import { addDays, format, isSameDay, isToday, startOfWeek } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DIAS_CORTOS } from "@/lib/format";
+import { ESTADOS_INFO } from "@/components/StatusBadge";
 import { cn } from "@/lib/utils";
 
 const COLOR_ESTADO = {
   pendiente: "border-l-brand-amber bg-brand-amber/10",
   confirmado: "border-l-brand-teal bg-brand-teal/10",
+  en_espera: "border-l-brand-blue bg-brand-blue/10",
+  en_consulta: "border-l-brand-teal-700 bg-brand-teal/15",
+  ausente: "border-l-muted-foreground bg-muted opacity-70",
   atendido: "border-l-brand-emerald bg-brand-emerald/10",
   cancelado: "border-l-brand-danger bg-brand-danger/10 opacity-70",
 };
 
-export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia }) {
+export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia, colorDe = () => null }) {
   const inicio = startOfWeek(dia, { weekStartsOn: 1 });
   const dias = Array.from({ length: 7 }, (_, i) => addDays(inicio, i));
 
@@ -21,7 +25,7 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
           type="button"
           aria-label="Semana anterior"
           onClick={() => onDia(addDays(inicio, -7))}
-          className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-brand-teal"
+          className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-brand-teal-700"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -32,7 +36,7 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
           type="button"
           aria-label="Semana siguiente"
           onClick={() => onDia(addDays(inicio, 7))}
-          className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-brand-teal"
+          className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:text-brand-teal-700"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -44,12 +48,13 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <div className="grid min-w-[760px] grid-cols-7 gap-2">
+          {/* En celular los días van uno debajo del otro en vez de obligar a scrollear de costado */}
+          <div className="grid grid-cols-1 gap-2 sm:min-w-[760px] sm:grid-cols-7">
             {dias.map((d) => {
               const iso = format(d, "yyyy-MM-dd");
               const delDia = turnos.filter((t) => t.fecha === iso);
               return (
-                <div key={iso} className="flex min-h-[220px] flex-col rounded-xl border border-border bg-background/60">
+                <div key={iso} className="flex flex-col rounded-xl border border-border bg-background/60 sm:min-h-[220px]">
                   <button
                     type="button"
                     onClick={() => onElegirDia(d)}
@@ -62,7 +67,7 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
                     <span
                       className={cn(
                         "tabular text-base font-semibold",
-                        isToday(d) ? "text-brand-teal" : "text-foreground"
+                        isToday(d) ? "text-brand-teal-700" : "text-foreground"
                       )}
                     >
                       {format(d, "d")}
@@ -73,7 +78,10 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
                     {delDia.length === 0 ? (
                       <p className="pt-4 text-center text-[11px] text-muted-foreground">Sin turnos</p>
                     ) : (
-                      delDia.map((t) => (
+                      delDia.map((t) => {
+                        const Icono = ESTADOS_INFO[t.estado]?.icono;
+                        const color = colorDe(t);
+                        return (
                         <button
                           key={t.id}
                           type="button"
@@ -83,10 +91,15 @@ export default function WeekCalendar({ dia, turnos, cargando, onDia, onElegirDia
                             COLOR_ESTADO[t.estado] || COLOR_ESTADO.pendiente
                           )}
                         >
-                          <span className="tabular block text-[11px] font-semibold text-foreground">{t.hora_inicio}</span>
+                          <span className="tabular flex items-center gap-1 text-[11px] font-semibold text-foreground">
+                            {Icono && <Icono className="h-3 w-3" aria-label={ESTADOS_INFO[t.estado].label} />}
+                            {t.hora_inicio}
+                            {color && <span className="ml-auto h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />}
+                          </span>
                           <span className="block truncate text-[11px] text-foreground">{t.paciente_nombre}</span>
                         </button>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>

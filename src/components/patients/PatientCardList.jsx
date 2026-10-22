@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Pencil, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/StatusBadge";
@@ -10,8 +11,8 @@ export default function PatientCardList({ pacientes, onEditar, onEliminar, esAdm
         <div key={paciente.id} className="rounded-2xl border border-border bg-card p-4 shadow-soft">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-medium text-foreground">{paciente.nombre_completo}</p>
-              <p className="mt-0.5 font-mono text-xs text-brand-teal">{valorODash(paciente.numero_ficha)}</p>
+              <Link to={`/patients/${paciente.id}`} className="font-medium text-foreground hover:text-brand-teal-700 hover:underline">{paciente.nombre_completo}</Link>
+              <p className="mt-0.5 font-mono text-xs text-brand-teal-700">{valorODash(paciente.numero_ficha)}</p>
             </div>
             <StatusBadge estado={paciente.activo === false ? "inactivo" : "activo"} />
           </div>

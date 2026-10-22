@@ -8,19 +8,19 @@ import { cn } from "@/lib/utils";
 const TARJETAS = [
   {
     icon: Users,
-    tono: "bg-brand-teal/10 text-brand-teal",
+    tono: "bg-brand-teal/10 text-brand-teal-700",
     titulo: "Gestión de Pacientes",
     texto: "Administración completa de pacientes con fichas digitales, datos de contacto y obra social",
   },
   {
     icon: FileText,
-    tono: "bg-brand-emerald/10 text-brand-emerald",
+    tono: "bg-brand-emerald/10 text-brand-emerald-700",
     titulo: "Historiales Clínicos",
     texto: "Registros médicos digitales con diagnósticos, tratamientos, notas y archivos adjuntos",
   },
   {
     icon: CalendarDays,
-    tono: "bg-brand-amber/10 text-[#B87400]",
+    tono: "bg-brand-amber/10 text-brand-amber-700",
     titulo: "Agenda de Turnos",
     texto: "Calendario intuitivo para gestionar citas con estados en tiempo real y vista semanal",
   },
@@ -95,7 +95,7 @@ export default function Landing() {
                   className="animate-slide-up flex items-center gap-3"
                   style={{ animationDelay: `${300 + i * 90}ms` }}
                 >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-teal/10 text-brand-teal">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-teal/10 text-brand-teal-700">
                     <Icon className="h-4 w-4" strokeWidth={2.1} />
                   </span>
                   <div>

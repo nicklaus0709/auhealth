@@ -36,7 +36,7 @@ export default function AttachmentPreviewModal({ adjunto, onOpenChange }) {
         </DialogHeader>
         <div className="flex min-h-[240px] items-center justify-center overflow-hidden rounded-xl bg-muted">
           {cargando ? (
-            <Loader2 className="h-6 w-6 animate-spin text-brand-teal" />
+            <Loader2 className="h-6 w-6 animate-spin text-brand-teal-700" />
           ) : url ? (
             <img src={url} alt={adjunto?.nombre || "Adjunto"} className="max-h-[70vh] w-auto object-contain" />
           ) : (

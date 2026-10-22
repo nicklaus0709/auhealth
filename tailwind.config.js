@@ -15,12 +15,13 @@ module.exports = {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			brand: {
-  				teal: '#259D91',
+  				// DEFAULT para íconos, bordes y fondos suaves (/10); 600-700 para texto y botones (contraste AA)
+  				teal: { DEFAULT: '#259D91', 50: '#EEF8F7', 100: '#D4EEEB', 600: '#1E8076', 700: '#186A62' },
   				'teal-deep': '#1E8076',
-  				emerald: '#2BAB6F',
-  				amber: '#F59F0A',
-  				danger: '#DC2828',
-  				blue: '#0DA2E7',
+  				emerald: { DEFAULT: '#2BAB6F', 700: '#17703F' },
+  				amber: { DEFAULT: '#F59F0A', 700: '#92400E' },
+  				danger: { DEFAULT: '#DC2828', 700: '#B91C1C' },
+  				blue: { DEFAULT: '#0DA2E7', 700: '#0A6F9F' },
   				ink: '#1D2530',
   				sub: '#6C7C93',
   				bg: '#F9FAFB',

@@ -1,0 +1,97 @@
+{
+  "name": "Antecedentes",
+  "type": "object",
+  "properties": {
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente (uno por paciente)"
+    },
+    "alergias": {
+      "type": "string"
+    },
+    "medicacion_habitual": {
+      "type": "string"
+    },
+    "enfermedades_cronicas": {
+      "type": "string"
+    },
+    "antecedentes_quirurgicos": {
+      "type": "string"
+    },
+    "antecedentes_familiares": {
+      "type": "string"
+    },
+    "habitos": {
+      "type": "string",
+      "description": "Tabaco, alcohol, actividad física"
+    },
+    "grupo_sanguineo": {
+      "type": "string",
+      "enum": [
+        "",
+        "0+",
+        "0-",
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-"
+      ]
+    },
+    "actualizado_por": {
+      "type": "string"
+    },
+    "actualizado_por_nombre": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "paciente"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "delete": false
+  }
+}

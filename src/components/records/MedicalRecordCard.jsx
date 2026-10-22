@@ -34,7 +34,7 @@ function Adjuntos({ adjuntos, onVer }) {
               aria-label={imagen ? `Ver ${adjunto.nombre}` : adjunto.nombre}
             >
               {imagen ? (
-                <ImageIcon className="h-7 w-7 text-brand-blue" strokeWidth={1.8} />
+                <ImageIcon className="h-7 w-7 text-brand-blue-700" strokeWidth={1.8} />
               ) : (
                 <FileText className="h-7 w-7 text-muted-foreground" strokeWidth={1.8} />
               )}
@@ -45,7 +45,7 @@ function Adjuntos({ adjuntos, onVer }) {
             <button
               type="button"
               onClick={() => descargar(adjunto)}
-              className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-brand-teal hover:underline"
+              className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-brand-teal-700 hover:underline"
             >
               <Download className="h-3 w-3" />
               Descargar
@@ -72,12 +72,15 @@ export default function MedicalRecordCard({ historial, addendas = [], puedeAgreg
             {historial.paciente_ficha ? ` (${historial.paciente_ficha})` : ""}
           </p>
           {historial.medico_nombre && (
-            <p className="text-xs text-muted-foreground">Registrado por {historial.medico_nombre}</p>
+            <p className="text-xs text-muted-foreground">
+              Registrado por {historial.medico_nombre}
+              {historial.medico_matricula ? ` · ${historial.medico_matricula}` : ""}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2">
           {adjuntos.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue-700">
               <Paperclip className="h-3.5 w-3.5" />
               {adjuntos.length}
             </span>
@@ -86,7 +89,7 @@ export default function MedicalRecordCard({ historial, addendas = [], puedeAgreg
             <button
               type="button"
               onClick={() => onAgregarNota?.(historial)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-brand-teal/40 hover:text-brand-teal"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-brand-teal/40 hover:text-brand-teal-700"
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
               Agregar nota
@@ -120,6 +123,7 @@ export default function MedicalRecordCard({ historial, addendas = [], puedeAgreg
             <div key={addenda.id} className="rounded-xl border-l-4 border-l-brand-teal bg-muted/40 p-4">
               <p className="text-xs text-muted-foreground">
                 {fechaHora(addenda.fecha)} · {addenda.medico_nombre || "Profesional"}
+                {addenda.medico_matricula ? ` · ${addenda.medico_matricula}` : ""}
               </p>
               <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{addenda.texto}</p>
               {addenda.adjuntos?.length > 0 && <Adjuntos adjuntos={addenda.adjuntos} onVer={setPreview} />}

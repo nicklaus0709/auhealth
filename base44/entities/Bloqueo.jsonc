@@ -1,0 +1,85 @@
+{
+  "name": "Bloqueo",
+  "type": "object",
+  "properties": {
+    "profesional": {
+      "type": "string",
+      "description": "Id del Profesional; vacío = todo el consultorio"
+    },
+    "profesional_nombre": {
+      "type": "string"
+    },
+    "desde": {
+      "type": "string",
+      "format": "date"
+    },
+    "hasta": {
+      "type": "string",
+      "format": "date"
+    },
+    "motivo": {
+      "type": "string",
+      "description": "Vacaciones, feriado, congreso..."
+    }
+  },
+  "required": [
+    "desde",
+    "hasta"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

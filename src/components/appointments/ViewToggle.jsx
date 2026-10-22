@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 const OPCIONES = [
   { value: "dia", label: "Día" },
   { value: "semana", label: "Semana" },
+  { value: "espera", label: "Sala de espera" },
 ];
 
 export default function ViewToggle({ vista, onVista }) {
@@ -15,7 +16,7 @@ export default function ViewToggle({ vista, onVista }) {
           onClick={() => onVista(o.value)}
           className={cn(
             "rounded-lg px-4 py-1.5 text-sm font-medium transition-colors",
-            vista === o.value ? "bg-brand-teal text-white" : "text-muted-foreground hover:text-foreground"
+            vista === o.value ? "bg-brand-teal-600 text-white" : "text-muted-foreground hover:text-foreground"
           )}
         >
           {o.label}

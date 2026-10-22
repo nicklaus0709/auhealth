@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const TONOS = {
-  teal: "bg-brand-teal/10 text-brand-teal",
-  emerald: "bg-brand-emerald/10 text-brand-emerald",
-  blue: "bg-brand-blue/10 text-brand-blue",
-  amber: "bg-brand-amber/10 text-[#B87400]",
+  teal: "bg-brand-teal/10 text-brand-teal-700",
+  emerald: "bg-brand-emerald/10 text-brand-emerald-700",
+  blue: "bg-brand-blue/10 text-brand-blue-700",
+  amber: "bg-brand-amber/10 text-brand-amber-700",
 };
 
 export default function StatCard({ etiqueta, valor, icon: Icon, tono = "teal", cargando = false, delay = 0, to }) {

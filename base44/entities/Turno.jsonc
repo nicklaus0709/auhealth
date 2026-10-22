@@ -30,13 +30,28 @@
       "enum": [
         "pendiente",
         "confirmado",
+        "en_espera",
+        "en_consulta",
         "atendido",
+        "ausente",
         "cancelado"
       ],
       "default": "pendiente"
     },
     "notas": {
       "type": "string"
+    },
+    "profesional": {
+      "type": "string",
+      "description": "Id del Profesional que atiende"
+    },
+    "profesional_nombre": {
+      "type": "string"
+    },
+    "llegada": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Hora en que el paciente se anunció en recepción"
     }
   },
   "required": [

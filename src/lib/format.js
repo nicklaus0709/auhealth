@@ -1,4 +1,4 @@
-import { format, parseISO, isValid } from "date-fns";
+import { differenceInYears, format, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 
 export const DIAS_CORTOS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
@@ -27,6 +27,11 @@ export function fechaHora(valor) {
 export function fechaCorta(valor) {
   const fecha = aFecha(valor);
   return fecha ? format(fecha, "dd/MM/yyyy") : "—";
+}
+
+export function edad(fechaNacimiento) {
+  const fecha = aFecha(fechaNacimiento);
+  return fecha ? differenceInYears(new Date(), fecha) : null;
 }
 
 export function hoyISO() {

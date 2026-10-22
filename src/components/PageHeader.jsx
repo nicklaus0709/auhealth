@@ -3,7 +3,7 @@ export default function PageHeader({ titulo, subtitulo, icon: Icon, accion }) {
     <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
         {Icon && (
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-teal/10 text-brand-teal">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-teal/10 text-brand-teal-700">
             <Icon className="h-5 w-5" strokeWidth={2.1} />
           </span>
         )}

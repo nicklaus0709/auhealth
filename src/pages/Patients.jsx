@@ -10,11 +10,13 @@ import PatientTable from "@/components/patients/PatientTable";
 import PatientCardList from "@/components/patients/PatientCardList";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { auditar, log } from "@/lib/log";
 
 export default function Patients() {
   const { toast } = useToast();
   const { esAdmin, nombre } = useSesion();
+  const confirmar = useConfirm();
   const [pacientes, setPacientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
@@ -115,9 +117,12 @@ export default function Patients() {
 
   // Los pacientes no se borran: su historia clínica se conserva. Se dan de baja y se pueden reactivar editándolos.
   const darDeBaja = async (paciente) => {
-    const confirmado = window.confirm(
-      `¿Dar de baja a ${paciente.nombre_completo}? Su historial se conserva y podés reactivarlo editando la ficha.`
-    );
+    const confirmado = await confirmar({
+      titulo: `¿Dar de baja a ${paciente.nombre_completo}?`,
+      descripcion: "Su historial se conserva y podés reactivarlo editando la ficha.",
+      confirmar: "Dar de baja",
+      peligro: true,
+    });
     if (!confirmado) return;
     try {
       await base44.entities.Paciente.update(paciente.id, { activo: false });

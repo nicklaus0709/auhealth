@@ -124,7 +124,7 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
                 arrastrando ? "border-brand-teal bg-brand-teal/5" : "border-border hover:border-brand-teal"
               }`}
             >
-              <UploadCloud className="h-6 w-6 text-brand-teal" strokeWidth={1.9} />
+              <UploadCloud className="h-6 w-6 text-brand-teal-700" strokeWidth={1.9} />
               <p className="mt-2 text-sm font-medium text-foreground">Arrastrá archivos o hacé click para seleccionar</p>
               <p className="mt-0.5 text-xs text-muted-foreground">Imágenes, PDFs y documentos (máx. 10MB por archivo)</p>
               <input

@@ -22,6 +22,7 @@ export default function Auth() {
   const { isAuthenticated } = useAuth();
 
   const returnTo = safeReturnTo();
+  const porInactividad = new URLSearchParams(window.location.search).get("motivo") === "inactividad";
   const destino = returnTo !== "/" ? returnTo : "/dashboard";
 
   if (isAuthenticated) return <Navigate to={destino} replace />;
@@ -74,6 +75,12 @@ export default function Auth() {
                 <span className="rounded-full bg-white px-3 text-xs text-muted-foreground">o con email</span>
               </div>
             </div>
+
+            {porInactividad && !error && (
+              <div className="mb-4 rounded-xl bg-brand-blue/10 px-3 py-2.5 text-sm text-brand-blue-700">
+                Cerramos tu sesión por inactividad para proteger los datos de los pacientes.
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 rounded-xl bg-destructive/10 px-3 py-2.5 text-sm text-destructive">{error}</div>

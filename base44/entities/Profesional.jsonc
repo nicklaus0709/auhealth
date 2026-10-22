@@ -1,0 +1,107 @@
+{
+  "name": "Profesional",
+  "type": "object",
+  "properties": {
+    "usuario": {
+      "type": "string",
+      "description": "Id del User vinculado (para saber qué agenda es la propia)"
+    },
+    "nombre_completo": {
+      "type": "string"
+    },
+    "especialidad": {
+      "type": "string"
+    },
+    "matricula_nacional": {
+      "type": "string",
+      "description": "MN"
+    },
+    "matricula_provincial": {
+      "type": "string",
+      "description": "MP"
+    },
+    "cuit": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color de su columna en la agenda"
+    },
+    "duracion_turno": {
+      "type": "number",
+      "default": 30,
+      "description": "Minutos por turno"
+    },
+    "horarios": {
+      "type": "array",
+      "default": [],
+      "description": "Franjas de atención semanales",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dia": {
+            "type": "number",
+            "description": "0=domingo ... 6=sábado"
+          },
+          "desde": {
+            "type": "string"
+          },
+          "hasta": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "firma_url": {
+      "type": "string",
+      "description": "Imagen de la firma para documentos (archivo privado)"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nombre_completo"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.usuario": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": false
+  }
+}

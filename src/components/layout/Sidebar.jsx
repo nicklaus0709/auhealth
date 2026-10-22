@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, FileText, CalendarDays, Wallet, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FileText, CalendarDays, Wallet, Shield, LogOut, Settings } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import BrandMark from "@/components/BrandMark";
 import useSesion from "@/hooks/useSesion";
@@ -17,7 +17,9 @@ export default function Sidebar({ className, onNavegar }) {
   const { pathname } = useLocation();
   const { user, inicial, esAdmin, esMedico } = useSesion();
   const visibles = NAV.filter((item) => !item.soloMedico || esMedico);
-  const items = esAdmin ? [...visibles, { label: "Usuarios", to: "/user-roles", icon: Shield }] : visibles;
+  const items = esAdmin
+    ? [...visibles, { label: "Usuarios", to: "/user-roles", icon: Shield }, { label: "Configuración", to: "/settings", icon: Settings }]
+    : visibles;
 
   return (
     <aside
@@ -38,7 +40,7 @@ export default function Sidebar({ className, onNavegar }) {
 
       <nav className="flex-1 space-y-1 px-3">
         {items.map(({ label, to, icon: Icon }) => {
-          const activo = pathname === to;
+          const activo = pathname === to || pathname.startsWith(`${to}/`);
           return (
             <Link
               key={to}

@@ -12,12 +12,20 @@
     "paciente_ficha": {
       "type": "string"
     },
+    "turno": {
+      "type": "string",
+      "description": "Id del Turno que originó la atención, si hubo"
+    },
     "medico": {
       "type": "string",
       "description": "Id del profesional que registra la atención"
     },
     "medico_nombre": {
       "type": "string"
+    },
+    "medico_matricula": {
+      "type": "string",
+      "description": "Matrícula del profesional al momento de firmar"
     },
     "fecha_atencion": {
       "type": "string",
@@ -29,11 +37,54 @@
     "diagnostico": {
       "type": "string"
     },
+    "diagnostico_cie10": {
+      "type": "string",
+      "description": "Código CIE-10 del diagnóstico principal"
+    },
     "tratamiento": {
       "type": "string"
     },
     "notas": {
       "type": "string"
+    },
+    "signos_vitales": {
+      "type": "object",
+      "description": "Signos vitales y antropometría de la consulta",
+      "properties": {
+        "tension_sistolica": {
+          "type": "number"
+        },
+        "tension_diastolica": {
+          "type": "number"
+        },
+        "frecuencia_cardiaca": {
+          "type": "number"
+        },
+        "frecuencia_respiratoria": {
+          "type": "number"
+        },
+        "temperatura": {
+          "type": "number"
+        },
+        "saturacion": {
+          "type": "number"
+        },
+        "peso": {
+          "type": "number",
+          "description": "kg"
+        },
+        "talla": {
+          "type": "number",
+          "description": "cm"
+        },
+        "imc": {
+          "type": "number"
+        },
+        "glucemia": {
+          "type": "number",
+          "description": "mg/dl"
+        }
+      }
     },
     "adjuntos": {
       "type": "array",

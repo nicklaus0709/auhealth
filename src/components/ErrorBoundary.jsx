@@ -19,7 +19,7 @@ export default class ErrorBoundary extends Component {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <div className="max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-soft">
-          <AlertTriangle className="mx-auto h-8 w-8 text-brand-amber" />
+          <AlertTriangle className="mx-auto h-8 w-8 text-brand-amber-700" />
           <h1 className="mt-4 font-heading text-lg font-semibold text-foreground">Algo salió mal</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Ocurrió un error inesperado. Recargá la página; si se repite, avisale al administrador.

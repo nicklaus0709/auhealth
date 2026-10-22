@@ -1,0 +1,79 @@
+{
+  "name": "Consultorio",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre de fantasía"
+    },
+    "razon_social": {
+      "type": "string"
+    },
+    "cuit": {
+      "type": "string"
+    },
+    "condicion_iva": {
+      "type": "string",
+      "enum": [
+        "monotributo",
+        "responsable_inscripto",
+        "exento"
+      ]
+    },
+    "direccion": {
+      "type": "string"
+    },
+    "localidad": {
+      "type": "string"
+    },
+    "telefono": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "hora_apertura": {
+      "type": "string",
+      "default": "08:00"
+    },
+    "hora_cierre": {
+      "type": "string",
+      "default": "20:00"
+    },
+    "minutos_inactividad": {
+      "type": "number",
+      "default": 15,
+      "description": "Cierre de sesión por inactividad"
+    }
+  },
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": false
+  }
+}

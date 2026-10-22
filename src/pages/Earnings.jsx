@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { addMonths, endOfMonth, format, startOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { base44 } from "@/api/base44Client";
@@ -21,6 +22,8 @@ import StatusBadge from "@/components/StatusBadge";
 import PaymentFormModal from "@/components/earnings/PaymentFormModal";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
+import { useConfirm } from "@/components/ConfirmProvider";
+import { log } from "@/lib/log";
 import { fechaCorta } from "@/lib/format";
 import { ARCA_URL, METODOS, exportarPdf, exportarXlsx, moneda, resumir } from "@/lib/earnings";
 
@@ -36,6 +39,9 @@ function Resumen({ etiqueta, valor, destacado = false }) {
 export default function Earnings() {
   const { toast } = useToast();
   const { user, nombre } = useSesion();
+  const confirmar = useConfirm();
+  const [params, setParams] = useSearchParams();
+  const [pacienteInicial, setPacienteInicial] = useState(null);
   const [mes, setMes] = useState(startOfMonth(new Date()));
   const [pagos, setPagos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -63,6 +69,21 @@ export default function Earnings() {
     cargar();
   }, [claveMes]);
 
+  // /earnings?paciente=<id>&turno=<id> llega desde un turno atendido: abre el cobro con el paciente cargado
+  useEffect(() => {
+    const id = params.get("paciente");
+    if (!id) return;
+    const turno = params.get("turno") || "";
+    base44.entities.Paciente.get(id)
+      .then((paciente) => {
+        setPacienteInicial({ ...paciente, turno });
+        setEditando(null);
+        setModalAbierto(true);
+      })
+      .catch((error) => log.error("No se pudo abrir el paciente pedido", error, { pantalla: "Earnings" }))
+      .finally(() => setParams({}, { replace: true }));
+  }, [params]);
+
   const resumen = useMemo(() => resumir(pagos), [pagos]);
   const periodo = format(mes, "MMMM yyyy", { locale: es });
   const archivo = `ganancias-${claveMes}`;
@@ -78,6 +99,7 @@ export default function Earnings() {
         toast({ title: "Cobro registrado" });
       }
       setModalAbierto(false);
+      setPacienteInicial(null);
       await cargar();
     } catch (error) {
       toast({ variant: "destructive", title: "No pudimos guardar el cobro", description: error?.message });
@@ -87,7 +109,8 @@ export default function Earnings() {
   };
 
   const eliminar = async (pago) => {
-    if (!window.confirm(`¿Eliminar el cobro de ${pago.paciente_nombre}?`)) return;
+    const ok = await confirmar({ titulo: `¿Eliminar el cobro de ${pago.paciente_nombre}?`, confirmar: "Eliminar", peligro: true });
+    if (!ok) return;
     try {
       await base44.entities.Pago.delete(pago.id);
       toast({ title: "Cobro eliminado" });
@@ -246,6 +269,7 @@ export default function Earnings() {
         abierto={modalAbierto}
         onOpenChange={setModalAbierto}
         pago={editando}
+        pacienteInicial={pacienteInicial}
         onGuardar={guardar}
         guardando={guardando}
       />

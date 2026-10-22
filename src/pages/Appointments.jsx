@@ -1,46 +1,77 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { addDays, format, startOfWeek } from "date-fns";
+import { Ban, CalendarDays, Plus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { CalendarDays, CalendarPlus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from "@/components/PageHeader";
-import EmptyState from "@/components/EmptyState";
 import WeekSelector from "@/components/appointments/WeekSelector";
-import AppointmentRow from "@/components/appointments/AppointmentRow";
 import WeekCalendar from "@/components/appointments/WeekCalendar";
 import ViewToggle from "@/components/appointments/ViewToggle";
+import AgendaDia from "@/components/appointments/AgendaDia";
+import SalaEspera from "@/components/appointments/SalaEspera";
+import BloqueosModal from "@/components/appointments/BloqueosModal";
+import TurnoDetalleModal from "@/components/appointments/TurnoDetalleModal";
 import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ConfirmProvider";
 import useSesion from "@/hooks/useSesion";
-import { log } from "@/lib/log";
+import { useConsultorio, useMiProfesional, useProfesionales } from "@/hooks/useDatos";
+import { bloqueoDe, superpuestos } from "@/lib/agenda";
 import { fechaLarga, hoyISO } from "@/lib/format";
+import { auditar, log } from "@/lib/log";
+
+const TODOS = "__todos__";
+const lista = (res) => res?.items ?? res ?? [];
 
 export default function Appointments() {
   const { toast } = useToast();
-  const { esAdmin } = useSesion();
+  const confirmar = useConfirm();
+  const { esAdmin, esMedico, nombre } = useSesion();
+  const [params, setParams] = useSearchParams();
+  const { data: profesionales = [] } = useProfesionales();
+  const { data: miProfesional } = useMiProfesional();
+  const { data: consultorio } = useConsultorio();
   const [dia, setDia] = useState(new Date());
   const [vista, setVista] = useState("dia");
+  const [filtro, setFiltro] = useState(TODOS);
   const [turnos, setTurnos] = useState([]);
-  const [editando, setEditando] = useState(null);
+  const [bloqueos, setBloqueos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [modalAbierto, setModalAbierto] = useState(false);
+  const [form, setForm] = useState(null); // { turno } o { inicial }
+  const [detalle, setDetalle] = useState(null);
+  const [bloqueosAbierto, setBloqueosAbierto] = useState(false);
   const [guardando, setGuardando] = useState(false);
+
+  // Un médico ve su agenda por defecto
+  useEffect(() => {
+    if (miProfesional?.id) setFiltro(miProfesional.id);
+  }, [miProfesional?.id]);
+
+  // /appointments?paciente=<id> abre "Nuevo turno" con el paciente ya elegido (desde la ficha)
+  useEffect(() => {
+    const id = params.get("paciente");
+    if (!id) return;
+    base44.entities.Paciente.get(id)
+      .then((paciente) => setForm({ inicial: { paciente } }))
+      .catch((error) => log.error("No se pudo abrir el paciente pedido", error, { pantalla: "Appointments" }))
+      .finally(() => setParams({}, { replace: true }));
+  }, [params]);
+
+  const inicioSemana = startOfWeek(dia, { weekStartsOn: 1 });
+  const desde = vista === "semana" ? format(inicioSemana, "yyyy-MM-dd") : format(dia, "yyyy-MM-dd");
+  const hasta = vista === "semana" ? format(addDays(inicioSemana, 6), "yyyy-MM-dd") : desde;
 
   const cargar = async () => {
     setCargando(true);
     try {
-      const inicioSemana = startOfWeek(dia, { weekStartsOn: 1 });
-      const consulta =
-        vista === "semana"
-          ? {
-              fecha: {
-                $gte: format(inicioSemana, "yyyy-MM-dd"),
-                $lte: format(addDays(inicioSemana, 6), "yyyy-MM-dd"),
-              },
-            }
-          : { fecha: format(dia, "yyyy-MM-dd") };
-      const res = await base44.entities.Turno.filter(consulta, { sort: "hora_inicio", limit: 300 });
-      setTurnos(res.items ?? res);
+      const [ts, bs] = await Promise.all([
+        base44.entities.Turno.filter({ fecha: { $gte: desde, $lte: hasta } }, { sort: "hora_inicio", limit: 500 }),
+        base44.entities.Bloqueo.filter({ hasta: { $gte: hoyISO() < desde ? hoyISO() : desde } }, { sort: "desde", limit: 200 }),
+      ]);
+      setTurnos(lista(ts));
+      setBloqueos(lista(bs));
     } catch (error) {
       log.error("No se pudo cargar la agenda", error, { pantalla: "Appointments" });
       toast({ variant: "destructive", title: "No pudimos cargar la agenda" });
@@ -49,63 +80,64 @@ export default function Appointments() {
     }
   };
 
-  const semanaClave = format(startOfWeek(dia, { weekStartsOn: 1 }), "yyyy-MM-dd");
-  const claveCarga = vista === "semana" ? semanaClave : format(dia, "yyyy-MM-dd");
-
   useEffect(() => {
     cargar();
-  }, [claveCarga, vista]);
+  }, [desde, hasta]);
 
-  const cambiarEstado = async (turno, estado) => {
+  const visibles = useMemo(() => (filtro === TODOS ? turnos : turnos.filter((t) => t.profesional === filtro)), [turnos, filtro]);
+  const columnas = filtro === TODOS ? profesionales : profesionales.filter((p) => p.id === filtro);
+  const colorDe = (t) => profesionales.find((p) => p.id === t.profesional)?.color || null;
+
+  const cambiarEstado = async (turno, estado, extra = {}) => {
     try {
-      await base44.entities.Turno.update(turno.id, { estado });
+      await base44.entities.Turno.update(turno.id, { estado, ...extra });
+      setTurnos((ts) => ts.map((t) => (t.id === turno.id ? { ...t, estado, ...extra } : t)));
+      setDetalle((d) => (d?.id === turno.id ? { ...d, estado, ...extra } : d));
       toast({ title: "Estado actualizado" });
-      await cargar();
     } catch (error) {
+      log.error("No se pudo cambiar el estado del turno", error, { pantalla: "Appointments" });
       toast({ variant: "destructive", title: "No pudimos actualizar el estado" });
     }
   };
 
   const eliminar = async (turno) => {
-    const confirmado = window.confirm(`¿Eliminar el turno de ${turno.paciente_nombre}?`);
-    if (!confirmado) return;
+    if (!(await confirmar({ titulo: `¿Eliminar el turno de ${turno.paciente_nombre}?`, confirmar: "Eliminar", peligro: true }))) return;
     try {
       await base44.entities.Turno.delete(turno.id);
+      auditar("eliminar", "Turno", { registro: turno.id, paciente: turno.paciente, usuario_nombre: nombre });
       toast({ title: "Turno eliminado" });
+      setDetalle(null);
       await cargar();
     } catch (error) {
+      log.error("No se pudo eliminar el turno", error, { pantalla: "Appointments" });
       toast({ variant: "destructive", title: "No pudimos eliminar el turno" });
     }
   };
 
-  const abrirModal = (turno = null) => {
-    setEditando(turno);
-    setModalAbierto(true);
-  };
-
-  // Todavía no hay profesional por turno (ver auditoría M-4), así que la superposición se avisa y no se bloquea.
-  const superpuestos = async (datos) => {
-    const res = await base44.entities.Turno.filter({ fecha: datos.fecha }, { limit: 300 });
-    return (res.items ?? res).filter(
-      (t) =>
-        t.id !== editando?.id &&
-        t.estado !== "cancelado" &&
-        t.hora_inicio < datos.hora_fin &&
-        datos.hora_inicio < t.hora_fin
-    );
-  };
-
   const guardar = async (datos) => {
+    const editando = form?.turno;
     setGuardando(true);
     try {
-      const choques = await superpuestos(datos);
+      const bloqueo = bloqueoDe(bloqueos, datos.fecha, datos.profesional || null);
+      if (
+        bloqueo &&
+        !(await confirmar({
+          titulo: "Ese día está bloqueado",
+          descripcion: `${bloqueo.motivo || "Sin atención"}${bloqueo.profesional_nombre ? ` (${bloqueo.profesional_nombre})` : ""}. ¿Agendar igual?`,
+          confirmar: "Agendar igual",
+        }))
+      ) {
+        return;
+      }
+      const delDia = lista(await base44.entities.Turno.filter({ fecha: datos.fecha }, { limit: 300 }));
+      const choques = superpuestos(delDia, { ...datos, id: editando?.id });
       if (
         choques.length &&
-        !window.confirm(
-          `Ese horario se superpone con ${choques.length} turno(s): ${choques
-            .map((t) => `${t.hora_inicio} ${t.paciente_nombre}`)
-            .join(", ")}. ¿Agendarlo igual?`
-        )
+        !(await confirmar({
+          titulo: "El horario se superpone",
+          descripcion: `Ya hay ${choques.length} turno(s): ${choques.map((t) => `${t.hora_inicio} ${t.paciente_nombre}`).join(", ")}. ¿Agendarlo igual como sobreturno?`,
+          confirmar: "Agendar igual",
+        }))
       ) {
         return;
       }
@@ -116,8 +148,8 @@ export default function Appointments() {
         await base44.entities.Turno.create(datos);
         toast({ title: "Turno agendado" });
       }
-      setModalAbierto(false);
-      setEditando(null);
+      setForm(null);
+      setDetalle(null);
       await cargar();
     } catch (error) {
       log.error("No se pudo guardar el turno", error, { pantalla: "Appointments" });
@@ -127,6 +159,8 @@ export default function Appointments() {
     }
   };
 
+  const fechaDia = format(dia, "yyyy-MM-dd");
+
   return (
     <div>
       <PageHeader
@@ -134,81 +168,108 @@ export default function Appointments() {
         titulo="Agenda de Turnos"
         subtitulo="Gestiona las citas y turnos de pacientes"
         accion={
-          <Button className="btn-gradient" onClick={() => abrirModal()}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Nuevo Turno
-          </Button>
+          <>
+            <Button variant="outline" onClick={() => setBloqueosAbierto(true)}>
+              <Ban className="mr-1.5 h-4 w-4" />
+              Bloqueos
+            </Button>
+            <Button className="btn-gradient" onClick={() => setForm({ inicial: { fecha: fechaDia } })}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Nuevo Turno
+            </Button>
+          </>
         }
       />
 
-      <ViewToggle vista={vista} onVista={setVista} />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <ViewToggle vista={vista} onVista={setVista} />
+        {profesionales.length > 0 && (
+          <Select value={filtro} onValueChange={setFiltro}>
+            <SelectTrigger className="h-10 w-[240px] bg-card" aria-label="Filtrar por profesional">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={TODOS}>Todos los profesionales</SelectItem>
+              {profesionales.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.nombre_completo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
 
-      {vista === "semana" && (
+      {vista === "semana" ? (
         <WeekCalendar
           dia={dia}
-          turnos={turnos}
+          turnos={visibles}
           cargando={cargando}
           onDia={setDia}
+          colorDe={colorDe}
           onElegirDia={(d) => {
             setDia(d);
             setVista("dia");
           }}
         />
-      )}
-
-      {vista === "dia" && <WeekSelector dia={dia} onDia={setDia} />}
-
-      {vista === "dia" && (
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6">
-        <h2 className="font-heading text-base font-semibold text-foreground">Turnos del {fechaLarga(dia)}</h2>
-        {format(dia, "yyyy-MM-dd") === hoyISO() && (
-          <span className="mt-1 inline-block text-xs font-medium text-brand-teal">Hoy</span>
-        )}
-
-        <div className="mt-4">
+      ) : (
+        <>
+          <WeekSelector dia={dia} onDia={setDia} />
+          <h2 className="mb-3 font-heading text-base font-semibold text-foreground">
+            {vista === "espera" ? "Sala de espera · " : "Turnos del "}
+            {fechaLarga(dia)}
+            {fechaDia === hoyISO() && <span className="ml-2 text-xs font-medium text-brand-teal-700">Hoy</span>}
+          </h2>
           {cargando ? (
             <div className="flex justify-center py-14">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-brand-teal" />
             </div>
-          ) : turnos.length === 0 ? (
-            <EmptyState
-              icon={CalendarPlus}
-              titulo="No hay turnos agendados para esta fecha"
-              accion={
-                <Button className="btn-gradient" onClick={() => abrirModal()}>
-                  <Plus className="mr-1.5 h-4 w-4" />
-                  Nuevo Turno
-                </Button>
-              }
-            />
+          ) : vista === "espera" ? (
+            <SalaEspera turnos={visibles} onEstado={cambiarEstado} onElegirTurno={setDetalle} />
           ) : (
-            <div className="space-y-3">
-              {turnos.map((turno) => (
-                <AppointmentRow
-                  key={turno.id}
-                  turno={turno}
-                  onEstado={cambiarEstado}
-                  onEditar={abrirModal}
-                  onEliminar={eliminar}
-                  esAdmin={esAdmin}
-                />
-              ))}
-            </div>
+            <AgendaDia
+              fecha={fechaDia}
+              turnos={visibles}
+              profesionales={columnas}
+              bloqueos={bloqueos}
+              consultorio={consultorio}
+              onNuevo={(inicial) => setForm({ inicial })}
+              onElegirTurno={setDetalle}
+            />
           )}
-        </div>
-      </section>
+        </>
       )}
 
-      <AppointmentFormModal
-        abierto={modalAbierto}
-        onOpenChange={(v) => {
-          setModalAbierto(v);
-          if (!v) setEditando(null);
+      <TurnoDetalleModal
+        turno={detalle}
+        onOpenChange={(v) => !v && setDetalle(null)}
+        onEstado={cambiarEstado}
+        onEditar={(t) => {
+          setDetalle(null);
+          setForm({ turno: t });
         }}
-        turno={editando}
+        onEliminar={eliminar}
+        esAdmin={esAdmin}
+        esMedico={esMedico}
+      />
+
+      <AppointmentFormModal
+        abierto={!!form}
+        onOpenChange={(v) => !v && setForm(null)}
+        turno={form?.turno || null}
+        inicial={form?.inicial || null}
         dia={dia}
+        profesionales={profesionales}
         onGuardar={guardar}
         guardando={guardando}
+      />
+
+      <BloqueosModal
+        abierto={bloqueosAbierto}
+        onOpenChange={setBloqueosAbierto}
+        bloqueos={bloqueos}
+        profesionales={profesionales}
+        onCambio={cargar}
       />
     </div>
   );
