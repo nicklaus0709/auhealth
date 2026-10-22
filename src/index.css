@@ -108,3 +108,21 @@
     font-variant-numeric: tabular-nums;
   }
 }
+/* Impresión de documentos clínicos: sólo sale la hoja (DocumentoImprimible) */
+#hoja-impresion {
+  display: none;
+}
+
+@media print {
+  body.imprimiendo-documento > *:not(#hoja-impresion) {
+    display: none !important;
+  }
+
+  body.imprimiendo-documento #hoja-impresion {
+    display: block;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "name": "DocumentoClinico",
+  "type": "object",
+  "properties": {
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "orden_estudio",
+        "derivacion",
+        "certificado",
+        "indicaciones",
+        "consentimiento"
+      ]
+    },
+    "paciente": {
+      "type": "string"
+    },
+    "paciente_nombre": {
+      "type": "string"
+    },
+    "paciente_dni": {
+      "type": "string"
+    },
+    "paciente_obra_social": {
+      "type": "string"
+    },
+    "historial": {
+      "type": "string",
+      "description": "Id de la atención relacionada, si hay"
+    },
+    "titulo": {
+      "type": "string"
+    },
+    "contenido": {
+      "type": "string"
+    },
+    "diagnostico": {
+      "type": "string"
+    },
+    "diagnostico_cie10": {
+      "type": "string"
+    },
+    "medico": {
+      "type": "string"
+    },
+    "medico_nombre": {
+      "type": "string"
+    },
+    "medico_matricula": {
+      "type": "string"
+    },
+    "profesional": {
+      "type": "string",
+      "description": "Id del Profesional (para la firma)"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "adjuntos": {
+      "type": "array",
+      "default": [],
+      "description": "Ej: consentimiento firmado escaneado",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tamano": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "tipo",
+    "paciente",
+    "contenido"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "update": false,
+    "delete": false
+  }
+}

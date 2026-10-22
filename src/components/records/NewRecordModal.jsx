@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Cie10Input from "@/components/records/Cie10Input";
+import { PLANTILLAS } from "@/lib/plantillas";
+import { SIGNOS, calcularImc, normalizarSignos } from "@/lib/signos";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadCloud, X, FileText, Loader2 } from "lucide-react";
 import { pesoArchivo } from "@/lib/format";
@@ -15,7 +20,7 @@ const TIPOS = [
   "text/plain",
 ];
 
-const VACIO = { motivo_consulta: "", diagnostico: "", tratamiento: "", notas: "", texto: "" };
+const VACIO = { motivo_consulta: "", diagnostico: "", diagnostico_cie10: "", tratamiento: "", notas: "", texto: "" };
 
 const aceptado = (archivo) =>
   TIPOS.some((tipo) => (tipo.endsWith("/") ? archivo.type.startsWith(tipo) : archivo.type === tipo));
@@ -26,11 +31,13 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
   const [archivos, setArchivos] = useState([]);
   const [arrastrando, setArrastrando] = useState(false);
   const [aviso, setAviso] = useState("");
+  const [signos, setSignos] = useState({});
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (!abierto) return;
     setDatos(VACIO);
+    setSignos({});
     setArchivos([]);
     setAviso("");
   }, [abierto, historial]);
@@ -65,7 +72,7 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
 
   const enviar = (e) => {
     e.preventDefault();
-    onGuardar({ ...datos, archivos: archivos.map((a) => a.file) });
+    onGuardar({ ...datos, signos_vitales: normalizarSignos(signos), archivos: archivos.map((a) => a.file) });
   };
 
   return (
@@ -89,8 +96,65 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
           ) : (
           <>
           <div className="space-y-2">
+            <Label htmlFor="plantilla">Plantilla</Label>
+            <Select
+              onValueChange={(id) => {
+                const p = PLANTILLAS.find((x) => x.id === id);
+                if (p) setDatos((d) => ({ ...d, motivo_consulta: p.motivo_consulta, diagnostico: p.diagnostico || d.diagnostico, tratamiento: p.tratamiento, notas: p.notas }));
+              }}
+            >
+              <SelectTrigger id="plantilla" className="h-10">
+                <SelectValue placeholder="Empezar desde una plantilla (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {PLANTILLAS.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="motivo_consulta">Motivo de Consulta *</Label>
             <Textarea id="motivo_consulta" required rows={3} value={datos.motivo_consulta} onChange={set("motivo_consulta")} placeholder="Describe el motivo de la consulta..." />
+          </div>
+          <details className="rounded-xl border border-border p-3" open>
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Signos vitales y medidas</summary>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {SIGNOS.map(({ campo, label, unidad, min, max, paso }) => (
+                <div key={campo} className="space-y-1">
+                  <Label htmlFor={`sv-${campo}`} className="text-xs text-muted-foreground">
+                    {label} ({unidad})
+                  </Label>
+                  <Input
+                    id={`sv-${campo}`}
+                    type="number"
+                    inputMode="decimal"
+                    min={min}
+                    max={max}
+                    step={paso || "1"}
+                    value={signos[campo] ?? ""}
+                    onChange={(e) => setSignos((s) => ({ ...s, [campo]: e.target.value }))}
+                    className="h-10"
+                  />
+                </div>
+              ))}
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">IMC</p>
+                <p className="tabular flex h-10 items-center text-sm font-semibold text-foreground">{calcularImc(signos.peso, signos.talla) ?? "—"}</p>
+              </div>
+            </div>
+          </details>
+          <div className="space-y-2">
+            <Label htmlFor="cie10">Diagnóstico codificado (CIE-10)</Label>
+            <Cie10Input
+              id="cie10"
+              codigo={datos.diagnostico_cie10}
+              onElegir={({ codigo, descripcion }) =>
+                setDatos((d) => ({ ...d, diagnostico_cie10: codigo, diagnostico: d.diagnostico?.trim() ? d.diagnostico : descripcion }))
+              }
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="diagnostico">Diagnóstico *</Label>

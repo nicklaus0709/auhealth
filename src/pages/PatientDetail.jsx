@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, CalendarDays, FileText, HeartPulse, Pencil, Plus, Printer, User, Wallet } from "lucide-react";
+import { Activity, AlertTriangle, ArrowLeft, CalendarDays, FilePlus2, FileText, HeartPulse, Pencil, Plus, Printer, User, Wallet } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,8 @@ import StatusBadge from "@/components/StatusBadge";
 import PatientFormModal from "@/components/patients/PatientFormModal";
 import AntecedentesCard from "@/components/patients/AntecedentesCard";
 import HistoriaClinica from "@/components/records/HistoriaClinica";
+import EvolucionCard from "@/components/patients/EvolucionCard";
+import DocumentosCard from "@/components/documentos/DocumentosCard";
 import EncabezadoImpresion from "@/components/EncabezadoImpresion";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
@@ -203,6 +205,18 @@ export default function PatientDetail() {
               Historia clínica
             </TabsTrigger>
           )}
+          {esMedico && (
+            <TabsTrigger value="evolucion">
+              <Activity className="mr-1.5 h-4 w-4" />
+              Evolución
+            </TabsTrigger>
+          )}
+          {esMedico && (
+            <TabsTrigger value="documentos">
+              <FilePlus2 className="mr-1.5 h-4 w-4" />
+              Documentos
+            </TabsTrigger>
+          )}
           <TabsTrigger value="turnos">
             <CalendarDays className="mr-1.5 h-4 w-4" />
             Turnos ({turnos.length})
@@ -244,6 +258,18 @@ export default function PatientDetail() {
         {esMedico && (
           <TabsContent value="historia" forceMount className="data-[state=inactive]:hidden">
             <HistoriaClinica ref={historia} paciente={paciente} turno={turnoOrigen} />
+          </TabsContent>
+        )}
+
+        {esMedico && (
+          <TabsContent value="evolucion">
+            <EvolucionCard paciente={paciente} />
+          </TabsContent>
+        )}
+
+        {esMedico && (
+          <TabsContent value="documentos">
+            <DocumentosCard paciente={paciente} />
           </TabsContent>
         )}
 

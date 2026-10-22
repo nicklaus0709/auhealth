@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
 import { Loader2, Plus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const VACIO = {
   telefono: "",
   email: "",
   usuario: "",
+  firma_url: "",
   color: COLORES[0],
   duracion_turno: 30,
   horarios: [],
@@ -30,6 +32,7 @@ const SIN_USUARIO = "__ninguno__";
 export default function ProfesionalFormModal({ abierto, onOpenChange, profesional, usuarios, onGuardar, guardando }) {
   const [datos, setDatos] = useState(VACIO);
   const [error, setError] = useState("");
+  const [subiendoFirma, setSubiendoFirma] = useState(false);
 
   useEffect(() => {
     if (!abierto) return;
@@ -40,6 +43,20 @@ export default function ProfesionalFormModal({ abierto, onOpenChange, profesiona
   const set = (campo) => (e) => setDatos((p) => ({ ...p, [campo]: e.target.value }));
   const setHorario = (i, campo, valor) =>
     setDatos((p) => ({ ...p, horarios: p.horarios.map((h, j) => (j === i ? { ...h, [campo]: valor } : h)) }));
+
+  // La firma se guarda como archivo privado: sólo se ve con URL firmada al imprimir documentos
+  const subirFirma = async (archivo) => {
+    if (!archivo) return;
+    setSubiendoFirma(true);
+    try {
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: archivo });
+      setDatos((p) => ({ ...p, firma_url: file_uri }));
+    } catch {
+      setError("No pudimos subir la firma, probá de nuevo");
+    } finally {
+      setSubiendoFirma(false);
+    }
+  };
 
   const enviar = (e) => {
     e.preventDefault();
@@ -57,6 +74,7 @@ export default function ProfesionalFormModal({ abierto, onOpenChange, profesiona
       color: datos.color,
       duracion_turno: Number(datos.duracion_turno) || 30,
       horarios: datos.horarios.map((h) => ({ dia: Number(h.dia), desde: h.desde, hasta: h.hasta })),
+      firma_url: datos.firma_url || "",
       activo: datos.activo !== false,
     });
   };
@@ -118,6 +136,14 @@ export default function ProfesionalFormModal({ abierto, onOpenChange, profesiona
               <Label htmlFor="prof-email">Email</Label>
               <Input id="prof-email" type="email" value={datos.email} onChange={set("email")} className="h-11" />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="prof-firma">Firma escaneada (para órdenes y certificados)</Label>
+            <Input id="prof-firma" type="file" accept="image/png,image/jpeg" onChange={(e) => subirFirma(e.target.files?.[0])} disabled={subiendoFirma} className="h-11" />
+            <p className="text-xs text-muted-foreground">
+              {subiendoFirma ? "Subiendo..." : datos.firma_url ? "Firma cargada. Subí otra imagen para reemplazarla." : "PNG con fondo blanco o transparente."}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -198,7 +224,7 @@ export default function ProfesionalFormModal({ abierto, onOpenChange, profesiona
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={guardando}>
               Cancelar
             </Button>
-            <Button type="submit" className="btn-gradient" disabled={guardando}>
+            <Button type="submit" className="btn-gradient" disabled={guardando || subiendoFirma}>
               {guardando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Guardar
             </Button>

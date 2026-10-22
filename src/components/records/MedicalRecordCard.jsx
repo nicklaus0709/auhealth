@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Download, FileText, Image as ImageIcon, MessageSquarePlus, Paperclip } from "lucide-react";
 import AttachmentPreviewModal from "@/components/records/AttachmentPreviewModal";
 import { fechaLarga, fechaHora, esImagen, truncar } from "@/lib/format";
+import { resumenSignos } from "@/lib/signos";
 
 function Seccion({ etiqueta, texto }) {
   if (!texto || !String(texto).trim()) return null;
@@ -100,7 +101,11 @@ export default function MedicalRecordCard({ historial, addendas = [], puedeAgreg
 
       <div className="mt-5 space-y-4">
         <Seccion etiqueta="Motivo de Consulta" texto={historial.motivo_consulta} />
-        <Seccion etiqueta="Diagnóstico" texto={historial.diagnostico} />
+        <Seccion etiqueta="Signos vitales" texto={resumenSignos(historial.signos_vitales)} />
+        <Seccion
+          etiqueta="Diagnóstico"
+          texto={historial.diagnostico_cie10 ? `[${historial.diagnostico_cie10}] ${historial.diagnostico || ""}` : historial.diagnostico}
+        />
         <Seccion etiqueta="Tratamiento" texto={historial.tratamiento} />
         <Seccion etiqueta="Notas" texto={historial.notas} />
       </div>
