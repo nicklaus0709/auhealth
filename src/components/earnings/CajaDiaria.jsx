@@ -118,7 +118,7 @@ export default function CajaDiaria() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Caja del {fechaLarga(hoy)}. Incluye los cobros de hoy que podés ver.</p>
+      <p className="text-sm text-muted-foreground">Caja del {fechaLarga(hoy)}. Incluye los cobros de hoy que podés ver (el admin ve los de todos).</p>
 
       {!caja ? (
         <form onSubmit={abrir} className="flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-5 shadow-soft">

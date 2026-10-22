@@ -206,9 +206,7 @@ export default function Dashboard() {
 
       {esAdmin && (
         <>
-          <h2 className="mb-1 mt-8 font-heading text-base font-semibold text-foreground">Este mes</h2>
-          {/* Hoy cada usuario ve sólo los cobros que registró (RLS de Pago): ver si el admin debe ver todos */}
-          <p className="mb-3 text-xs text-muted-foreground">Los importes incluyen los cobros que registraste vos.</p>
+          <h2 className="mb-3 mt-8 font-heading text-base font-semibold text-foreground">Este mes</h2>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard etiqueta="Cobrado" valor={cargando ? 0 : moneda(resumen.cobrado)} icon={Wallet} to="/earnings" tono="emerald" cargando={cargando} />
             <StatCard etiqueta="Cobrado sin facturar" valor={cargando ? 0 : moneda(resumen.sinFacturar)} icon={Receipt} to="/earnings" tono="amber" cargando={cargando} />

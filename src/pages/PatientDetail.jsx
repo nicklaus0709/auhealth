@@ -36,7 +36,7 @@ export default function PatientDetail() {
   // ?nueva=1&turno=<id> llega desde un turno atendido: abre la atención ya vinculada a ese turno
   const turnoOrigen = params.get("turno") ? { id: params.get("turno") } : null;
   const { toast } = useToast();
-  const { esMedico, nombre } = useSesion();
+  const { esMedico, esAdmin, nombre } = useSesion();
   const [paciente, setPaciente] = useState(null);
   const [antecedentes, setAntecedentes] = useState(null);
   const [turnos, setTurnos] = useState([]);
@@ -327,7 +327,7 @@ export default function PatientDetail() {
         <TabsContent value="cobros">
           <section className="rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6">
             {pagos.length === 0 ? (
-              <EmptyState icon={Wallet} titulo="Sin cobros registrados" descripcion="Sólo ves los cobros que registraste vos." />
+              <EmptyState icon={Wallet} titulo="Sin cobros registrados" descripcion={esAdmin ? undefined : "Sólo ves los cobros que registraste vos."} />
             ) : (
               <ul className="divide-y divide-border">
                 {pagos.map((p) => (
