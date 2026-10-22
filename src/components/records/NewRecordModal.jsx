@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UploadCloud, X, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
+import { UploadCloud, X, FileText, Loader2 } from "lucide-react";
 import { pesoArchivo } from "@/lib/format";
 
 const MAX_PESO = 10 * 1024 * 1024;
@@ -15,11 +15,12 @@ const TIPOS = [
   "text/plain",
 ];
 
-const VACIO = { motivo_consulta: "", diagnostico: "", tratamiento: "", notas: "" };
+const VACIO = { motivo_consulta: "", diagnostico: "", tratamiento: "", notas: "", texto: "" };
 
 const aceptado = (archivo) =>
   TIPOS.some((tipo) => (tipo.endsWith("/") ? archivo.type.startsWith(tipo) : archivo.type === tipo));
 
+// Con `historial` el modal agrega una addenda (corrección o ampliación firmada): la atención original no se edita.
 export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guardando, historial }) {
   const [datos, setDatos] = useState(VACIO);
   const [archivos, setArchivos] = useState([]);
@@ -29,16 +30,7 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
 
   useEffect(() => {
     if (!abierto) return;
-    setDatos(
-      historial
-        ? {
-            motivo_consulta: historial.motivo_consulta || "",
-            diagnostico: historial.diagnostico || "",
-            tratamiento: historial.tratamiento || "",
-            notas: historial.notas || "",
-          }
-        : VACIO
-    );
+    setDatos(VACIO);
     setArchivos([]);
     setAviso("");
   }, [abierto, historial]);
@@ -81,11 +73,21 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
       <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">
-            {historial ? "Editar Atención Médica" : "Nueva Atención Médica"}
+            {historial ? "Agregar nota a la atención" : "Nueva Atención Médica"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={enviar} className="space-y-4">
+          {historial ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                La atención original no se modifica. La nota queda agregada con tu nombre, fecha y hora.
+              </p>
+              <Label htmlFor="addenda_texto">Nota, corrección o resultado *</Label>
+              <Textarea id="addenda_texto" required rows={5} value={datos.texto} onChange={set("texto")} placeholder="Ej: Se corrige la dosis indicada..." />
+            </div>
+          ) : (
+          <>
           <div className="space-y-2">
             <Label htmlFor="motivo_consulta">Motivo de Consulta *</Label>
             <Textarea id="motivo_consulta" required rows={3} value={datos.motivo_consulta} onChange={set("motivo_consulta")} placeholder="Describe el motivo de la consulta..." />
@@ -102,6 +104,8 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
             <Label htmlFor="notas">Notas y Observaciones</Label>
             <Textarea id="notas" rows={3} value={datos.notas} onChange={set("notas")} placeholder="Notas adicionales..." />
           </div>
+          </>
+          )}
 
           <div className="space-y-3">
             <div
@@ -137,12 +141,6 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
             </div>
 
             {aviso && <p className="text-xs text-destructive">{aviso}</p>}
-
-            {historial?.adjuntos?.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {historial.adjuntos.length} archivo(s) ya guardado(s) en esta atención.
-              </p>
-            )}
 
             {archivos.length > 0 && (
               <div className="rounded-xl border border-border bg-muted/40 p-3">
@@ -184,7 +182,7 @@ export default function NewRecordModal({ abierto, onOpenChange, onGuardar, guard
             </Button>
             <Button type="submit" className="btn-gradient" disabled={guardando}>
               {guardando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {guardando ? "Guardando..." : historial ? "Guardar Cambios" : "Registrar Atención"}
+              {guardando ? "Guardando..." : historial ? "Agregar nota" : "Registrar Atención"}
             </Button>
           </DialogFooter>
         </form>

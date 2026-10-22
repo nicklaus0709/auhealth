@@ -10,10 +10,11 @@ import UsersTable from "@/components/users/UsersTable";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
 import { ROL_LABEL } from "@/lib/roles";
+import { auditar } from "@/lib/log";
 
 export default function UserRoles() {
   const { toast } = useToast();
-  const { esAdmin } = useSesion();
+  const { esAdmin, nombre } = useSesion();
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -92,6 +93,7 @@ export default function UserRoles() {
         roles: [...actuales, rol],
         ...(rol === "admin" ? { role: "admin" } : {}),
       });
+      auditar("rol_asignado", "User", { registro: usuarioId, detalle: rol, usuario_nombre: nombre });
       toast({ title: `Rol ${ROL_LABEL[rol]} asignado` });
       await cargar();
     } catch (error) {
@@ -108,6 +110,7 @@ export default function UserRoles() {
         roles: actuales.filter((r) => r !== rol),
         ...(rol === "admin" ? { role: "user" } : {}),
       });
+      auditar("rol_quitado", "User", { registro: usuario.id, detalle: rol, usuario_nombre: nombre });
       toast({ title: `Rol ${ROL_LABEL[rol]} quitado` });
       await cargar();
     } catch (error) {

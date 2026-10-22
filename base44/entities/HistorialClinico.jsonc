@@ -14,7 +14,7 @@
     },
     "medico": {
       "type": "string",
-      "description": "Id del profesional que registra la atenci\u00f3n"
+      "description": "Id del profesional que registra la atención"
     },
     "medico_nombre": {
       "type": "string"
@@ -72,7 +72,7 @@
         },
         {
           "user_condition": {
-            "role": "user"
+            "data.roles": "medico"
           }
         }
       ]
@@ -86,34 +86,12 @@
         },
         {
           "user_condition": {
-            "role": "user"
+            "data.roles": "medico"
           }
         }
       ]
     },
-    "update": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    }
+    "update": false,
+    "delete": false
   }
 }

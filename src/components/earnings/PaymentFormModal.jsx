@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
+import PacienteCombobox from "@/components/patients/PacienteCombobox";
 import { METODOS, calcularCobrado, calcularEstado, moneda, num } from "@/lib/earnings";
 import { hoyISO } from "@/lib/format";
 
@@ -24,13 +24,18 @@ const VACIO = {
   notas: "",
 };
 
-export default function PaymentFormModal({ abierto, onOpenChange, pacientes, pago, onGuardar, guardando }) {
+export default function PaymentFormModal({ abierto, onOpenChange, pago, onGuardar, guardando }) {
   const [datos, setDatos] = useState(VACIO);
+  const [paciente, setPaciente] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!abierto) return;
     setError("");
+    // Al editar mostramos al paciente del cobro aunque hoy esté dado de baja
+    setPaciente(
+      pago ? { id: pago.paciente, nombre_completo: pago.paciente_nombre, numero_ficha: pago.paciente_ficha, obra_social: pago.obra_social } : null
+    );
     if (pago) {
       setDatos(
         Object.fromEntries(
@@ -48,15 +53,14 @@ export default function PaymentFormModal({ abierto, onOpenChange, pacientes, pag
 
   const enviar = (e) => {
     e.preventDefault();
-    if (!datos.paciente) return setError("Elegí un paciente");
+    if (!paciente) return setError("Elegí un paciente");
     if (num(datos.importe) <= 0) return setError("Ingresá el importe de la prestación");
     if (cobrado > num(datos.importe)) return setError("Lo cobrado no puede superar el importe");
-    const paciente = pacientes.find((p) => p.id === datos.paciente);
     onGuardar({
-      paciente: datos.paciente,
-      paciente_nombre: paciente?.nombre_completo || pago?.paciente_nombre || "",
-      paciente_ficha: paciente?.numero_ficha || pago?.paciente_ficha || "",
-      obra_social: paciente?.obra_social || pago?.obra_social || "",
+      paciente: paciente.id,
+      paciente_nombre: paciente.nombre_completo || "",
+      paciente_ficha: paciente.numero_ficha || "",
+      obra_social: paciente.obra_social || "",
       fecha: datos.fecha,
       concepto: datos.concepto.trim(),
       importe: num(datos.importe),
@@ -79,18 +83,7 @@ export default function PaymentFormModal({ abierto, onOpenChange, pacientes, pag
         <form onSubmit={enviar} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="pago-paciente">Paciente *</Label>
-            <Select value={datos.paciente} onValueChange={(valor) => setDatos((p) => ({ ...p, paciente: valor }))}>
-              <SelectTrigger id="pago-paciente" className="h-11">
-                <SelectValue placeholder="Seleccioná un paciente" />
-              </SelectTrigger>
-              <SelectContent>
-                {pacientes.map((paciente) => (
-                  <SelectItem key={paciente.id} value={paciente.id}>
-                    {paciente.nombre_completo} - {paciente.numero_ficha}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <PacienteCombobox id="pago-paciente" seleccionado={paciente} onElegir={setPaciente} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

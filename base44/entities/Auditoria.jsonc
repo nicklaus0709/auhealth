@@ -1,0 +1,54 @@
+{
+  "name": "Auditoria",
+  "type": "object",
+  "properties": {
+    "accion": {
+      "type": "string",
+      "description": "ver, crear, editar, baja, rol_asignado, rol_quitado, etc."
+    },
+    "entidad": {
+      "type": "string"
+    },
+    "registro": {
+      "type": "string",
+      "description": "Id del registro afectado"
+    },
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente involucrado, si corresponde"
+    },
+    "usuario_nombre": {
+      "type": "string"
+    },
+    "detalle": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "accion",
+    "entidad"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "user"
+          }
+        }
+      ]
+    },
+    "update": false,
+    "delete": false
+  }
+}

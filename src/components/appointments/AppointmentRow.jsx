@@ -1,4 +1,4 @@
-import { Clock, Trash2 } from "lucide-react";
+import { Clock, Pencil, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import StatusBadge from "@/components/StatusBadge";
 
@@ -9,7 +9,7 @@ const ESTADOS = [
   { value: "cancelado", label: "Cancelado" },
 ];
 
-export default function AppointmentRow({ turno, onEstado, onEliminar, esAdmin }) {
+export default function AppointmentRow({ turno, onEstado, onEditar, onEliminar, esAdmin }) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-soft sm:flex-row sm:items-center">
       <div className="flex items-center gap-3 sm:w-[210px] sm:shrink-0">
@@ -42,6 +42,15 @@ export default function AppointmentRow({ turno, onEstado, onEliminar, esAdmin })
             ))}
           </SelectContent>
         </Select>
+
+        <button
+          type="button"
+          aria-label="Editar turno"
+          onClick={() => onEditar(turno)}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-brand-teal/10 hover:text-brand-teal"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
 
         {esAdmin && (
           <button

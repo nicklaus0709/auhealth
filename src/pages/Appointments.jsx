@@ -12,6 +12,7 @@ import ViewToggle from "@/components/appointments/ViewToggle";
 import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
 import { useToast } from "@/components/ui/use-toast";
 import useSesion from "@/hooks/useSesion";
+import { log } from "@/lib/log";
 import { fechaLarga, hoyISO } from "@/lib/format";
 
 export default function Appointments() {
@@ -20,17 +21,10 @@ export default function Appointments() {
   const [dia, setDia] = useState(new Date());
   const [vista, setVista] = useState("dia");
   const [turnos, setTurnos] = useState([]);
-  const [pacientes, setPacientes] = useState([]);
+  const [editando, setEditando] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await base44.entities.Paciente.filter({ activo: true }, { sort: "nombre_completo", limit: 300 });
-      setPacientes(res.items ?? res);
-    })();
-  }, []);
 
   const cargar = async () => {
     setCargando(true);
@@ -47,6 +41,9 @@ export default function Appointments() {
           : { fecha: format(dia, "yyyy-MM-dd") };
       const res = await base44.entities.Turno.filter(consulta, { sort: "hora_inicio", limit: 300 });
       setTurnos(res.items ?? res);
+    } catch (error) {
+      log.error("No se pudo cargar la agenda", error, { pantalla: "Appointments" });
+      toast({ variant: "destructive", title: "No pudimos cargar la agenda" });
     } finally {
       setCargando(false);
     }
@@ -81,15 +78,50 @@ export default function Appointments() {
     }
   };
 
+  const abrirModal = (turno = null) => {
+    setEditando(turno);
+    setModalAbierto(true);
+  };
+
+  // Todavía no hay profesional por turno (ver auditoría M-4), así que la superposición se avisa y no se bloquea.
+  const superpuestos = async (datos) => {
+    const res = await base44.entities.Turno.filter({ fecha: datos.fecha }, { limit: 300 });
+    return (res.items ?? res).filter(
+      (t) =>
+        t.id !== editando?.id &&
+        t.estado !== "cancelado" &&
+        t.hora_inicio < datos.hora_fin &&
+        datos.hora_inicio < t.hora_fin
+    );
+  };
+
   const guardar = async (datos) => {
     setGuardando(true);
     try {
-      await base44.entities.Turno.create(datos);
-      toast({ title: "Turno agendado" });
+      const choques = await superpuestos(datos);
+      if (
+        choques.length &&
+        !window.confirm(
+          `Ese horario se superpone con ${choques.length} turno(s): ${choques
+            .map((t) => `${t.hora_inicio} ${t.paciente_nombre}`)
+            .join(", ")}. ¿Agendarlo igual?`
+        )
+      ) {
+        return;
+      }
+      if (editando) {
+        await base44.entities.Turno.update(editando.id, datos);
+        toast({ title: "Turno actualizado" });
+      } else {
+        await base44.entities.Turno.create(datos);
+        toast({ title: "Turno agendado" });
+      }
       setModalAbierto(false);
+      setEditando(null);
       await cargar();
     } catch (error) {
-      toast({ variant: "destructive", title: "No pudimos agendar el turno", description: error?.message });
+      log.error("No se pudo guardar el turno", error, { pantalla: "Appointments" });
+      toast({ variant: "destructive", title: "No pudimos guardar el turno", description: error?.message });
     } finally {
       setGuardando(false);
     }
@@ -102,7 +134,7 @@ export default function Appointments() {
         titulo="Agenda de Turnos"
         subtitulo="Gestiona las citas y turnos de pacientes"
         accion={
-          <Button className="btn-gradient" onClick={() => setModalAbierto(true)}>
+          <Button className="btn-gradient" onClick={() => abrirModal()}>
             <Plus className="mr-1.5 h-4 w-4" />
             Nuevo Turno
           </Button>
@@ -143,7 +175,7 @@ export default function Appointments() {
               icon={CalendarPlus}
               titulo="No hay turnos agendados para esta fecha"
               accion={
-                <Button className="btn-gradient" onClick={() => setModalAbierto(true)}>
+                <Button className="btn-gradient" onClick={() => abrirModal()}>
                   <Plus className="mr-1.5 h-4 w-4" />
                   Nuevo Turno
                 </Button>
@@ -156,6 +188,7 @@ export default function Appointments() {
                   key={turno.id}
                   turno={turno}
                   onEstado={cambiarEstado}
+                  onEditar={abrirModal}
                   onEliminar={eliminar}
                   esAdmin={esAdmin}
                 />
@@ -168,8 +201,11 @@ export default function Appointments() {
 
       <AppointmentFormModal
         abierto={modalAbierto}
-        onOpenChange={setModalAbierto}
-        pacientes={pacientes}
+        onOpenChange={(v) => {
+          setModalAbierto(v);
+          if (!v) setEditando(null);
+        }}
+        turno={editando}
         dia={dia}
         onGuardar={guardar}
         guardando={guardando}

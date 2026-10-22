@@ -38,18 +38,10 @@ export default function Earnings() {
   const { user, nombre } = useSesion();
   const [mes, setMes] = useState(startOfMonth(new Date()));
   const [pagos, setPagos] = useState([]);
-  const [pacientes, setPacientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState(null);
   const [guardando, setGuardando] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await base44.entities.Paciente.filter({ activo: true }, { sort: "nombre_completo", limit: 300 });
-      setPacientes(res.items ?? res);
-    })();
-  }, []);
 
   const cargar = async () => {
     setCargando(true);
@@ -253,7 +245,6 @@ export default function Earnings() {
       <PaymentFormModal
         abierto={modalAbierto}
         onOpenChange={setModalAbierto}
-        pacientes={pacientes}
         pago={editando}
         onGuardar={guardar}
         guardando={guardando}

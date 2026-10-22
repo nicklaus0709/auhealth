@@ -17,7 +17,14 @@
           "recepcionista"
         ]
       },
-      "default": []
+      "default": [],
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     }
   }
 }

@@ -19,6 +19,11 @@ export function fechaMedia(valor) {
   return fecha ? format(fecha, "EEEE d 'de' MMMM", { locale: es }) : "—";
 }
 
+export function fechaHora(valor) {
+  const fecha = aFecha(valor);
+  return fecha ? format(fecha, "dd/MM/yyyy HH:mm") : "—";
+}
+
 export function fechaCorta(valor) {
   const fecha = aFecha(valor);
   return fecha ? format(fecha, "dd/MM/yyyy") : "—";

@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, UserX } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import StatusBadge from "@/components/StatusBadge";
 import { fechaCorta, valorODash } from "@/lib/format";
@@ -44,14 +44,14 @@ export default function PatientTable({ pacientes, onEditar, onEliminar, esAdmin 
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
-                  {esAdmin && (
+                  {esAdmin && paciente.activo !== false && (
                     <button
                       type="button"
-                      aria-label="Eliminar paciente"
+                      aria-label="Dar de baja paciente"
                       onClick={() => onEliminar(paciente)}
                       className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <UserX className="h-4 w-4" />
                     </button>
                   )}
                 </div>

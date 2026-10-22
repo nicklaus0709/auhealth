@@ -4,7 +4,7 @@
   "properties": {
     "numero_ficha": {
       "type": "string",
-      "description": "N\u00famero de ficha \u00fanico con formato P000001"
+      "description": "Número de ficha único con formato P000001"
     },
     "nombre_completo": {
       "type": "string"
@@ -90,10 +90,6 @@
         }
       ]
     },
-    "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
-    }
+    "delete": false
   }
 }

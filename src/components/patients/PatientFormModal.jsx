@@ -43,7 +43,7 @@ export default function PatientFormModal({ abierto, onOpenChange, paciente, onGu
     e.preventDefault();
     onGuardar({
       nombre_completo: datos.nombre_completo.trim(),
-      dni: datos.dni.trim(),
+      dni: datos.dni.replace(/[.\s-]/g, ""),
       fecha_nacimiento: datos.fecha_nacimiento,
       telefono: datos.telefono,
       email: datos.email,
@@ -71,7 +71,7 @@ export default function PatientFormModal({ abierto, onOpenChange, paciente, onGu
             </div>
             <div className="space-y-2">
               <Label htmlFor="dni">DNI *</Label>
-              <Input id="dni" required value={datos.dni} onChange={set("dni")} placeholder="30123456" className="h-11" />
+              <Input id="dni" required inputMode="numeric" pattern="[0-9.\s\-]{6,12}" title="Sólo números (puede llevar puntos)" value={datos.dni} onChange={set("dni")} placeholder="30123456" className="h-11" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fecha_nacimiento">Fecha de Nacimiento *</Label>

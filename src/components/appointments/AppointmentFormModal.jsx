@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import PacienteCombobox from "@/components/patients/PacienteCombobox";
 
 const ESTADOS = [
   { value: "pendiente", label: "Pendiente" },
@@ -15,39 +16,47 @@ const ESTADOS = [
   { value: "cancelado", label: "Cancelado" },
 ];
 
-export default function AppointmentFormModal({ abierto, onOpenChange, pacientes, dia, onGuardar, guardando }) {
-  const [datos, setDatos] = useState({ paciente: "", inicio: "", fin: "", tipo_consulta: "", estado: "pendiente", notas: "" });
+// Con `turno` el modal edita/reprograma; sin él, crea uno nuevo para `dia`.
+export default function AppointmentFormModal({ abierto, onOpenChange, turno, dia, onGuardar, guardando }) {
+  const [paciente, setPaciente] = useState(null);
+  const [datos, setDatos] = useState({ fecha: "", inicio: "", fin: "", tipo_consulta: "", estado: "pendiente", notas: "" });
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!abierto) return;
-    const base = format(dia, "yyyy-MM-dd");
-    setDatos({ paciente: "", inicio: `${base}T09:00`, fin: `${base}T09:30`, tipo_consulta: "", estado: "pendiente", notas: "" });
     setError("");
-  }, [abierto, dia]);
+    if (turno) {
+      setPaciente({ id: turno.paciente, nombre_completo: turno.paciente_nombre, numero_ficha: turno.paciente_ficha });
+      setDatos({
+        fecha: turno.fecha,
+        inicio: turno.hora_inicio,
+        fin: turno.hora_fin,
+        tipo_consulta: turno.tipo_consulta || "",
+        estado: turno.estado || "pendiente",
+        notas: turno.notas || "",
+      });
+    } else {
+      setPaciente(null);
+      setDatos({ fecha: format(dia, "yyyy-MM-dd"), inicio: "09:00", fin: "09:30", tipo_consulta: "", estado: "pendiente", notas: "" });
+    }
+  }, [abierto, dia, turno]);
 
   const set = (campo) => (e) => setDatos((previos) => ({ ...previos, [campo]: e.target.value }));
 
   const enviar = (e) => {
     e.preventDefault();
-    const inicio = new Date(datos.inicio);
-    const fin = new Date(datos.fin);
-    if (!datos.inicio || !datos.fin || Number.isNaN(inicio.getTime()) || Number.isNaN(fin.getTime())) {
-      setError("Completá la fecha y hora de inicio y de fin");
-      return;
-    }
-    if (fin <= inicio) {
-      setError("La fecha/hora de fin debe ser posterior a la de inicio");
-      return;
-    }
-    const paciente = pacientes.find((p) => p.id === datos.paciente);
+    if (!paciente) return setError("Elegí un paciente");
+    if (!datos.fecha || !datos.inicio || !datos.fin) return setError("Completá la fecha y los horarios");
+    // HH:mm se compara bien como texto
+    if (datos.fin <= datos.inicio) return setError("La hora de fin debe ser posterior a la de inicio");
+    setError("");
     onGuardar({
-      paciente: datos.paciente,
-      paciente_nombre: paciente?.nombre_completo || "",
-      paciente_ficha: paciente?.numero_ficha || "",
-      fecha: format(inicio, "yyyy-MM-dd"),
-      hora_inicio: format(inicio, "HH:mm"),
-      hora_fin: format(fin, "HH:mm"),
+      paciente: paciente.id,
+      paciente_nombre: paciente.nombre_completo || "",
+      paciente_ficha: paciente.numero_ficha || "",
+      fecha: datos.fecha,
+      hora_inicio: datos.inicio,
+      hora_fin: datos.fin,
       tipo_consulta: datos.tipo_consulta.trim(),
       estado: datos.estado,
       notas: datos.notas,
@@ -58,34 +67,27 @@ export default function AppointmentFormModal({ abierto, onOpenChange, pacientes,
     <Dialog open={abierto} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] max-w-xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-heading text-lg">Nuevo Turno</DialogTitle>
+          <DialogTitle className="font-heading text-lg">{turno ? "Editar Turno" : "Nuevo Turno"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={enviar} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="turno-paciente">Paciente *</Label>
-            <Select value={datos.paciente} onValueChange={(valor) => setDatos((p) => ({ ...p, paciente: valor }))}>
-              <SelectTrigger id="turno-paciente" className="h-11">
-                <SelectValue placeholder="Seleccioná un paciente" />
-              </SelectTrigger>
-              <SelectContent>
-                {pacientes.map((paciente) => (
-                  <SelectItem key={paciente.id} value={paciente.id}>
-                    {paciente.nombre_completo} - {paciente.numero_ficha}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <PacienteCombobox id="turno-paciente" seleccionado={paciente} onElegir={setPaciente} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="turno-inicio">Fecha y Hora de Inicio *</Label>
-              <Input id="turno-inicio" type="datetime-local" required value={datos.inicio} onChange={set("inicio")} className="h-11" />
+              <Label htmlFor="turno-fecha">Fecha *</Label>
+              <Input id="turno-fecha" type="date" required value={datos.fecha} onChange={set("fecha")} className="h-11" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="turno-fin">Fecha y Hora de Fin *</Label>
-              <Input id="turno-fin" type="datetime-local" required value={datos.fin} onChange={set("fin")} className="h-11" />
+              <Label htmlFor="turno-inicio">Desde *</Label>
+              <Input id="turno-inicio" type="time" required value={datos.inicio} onChange={set("inicio")} className="h-11" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="turno-fin">Hasta *</Label>
+              <Input id="turno-fin" type="time" required value={datos.fin} onChange={set("fin")} className="h-11" />
             </div>
           </div>
 
@@ -123,7 +125,7 @@ export default function AppointmentFormModal({ abierto, onOpenChange, pacientes,
             </Button>
             <Button type="submit" className="btn-gradient" disabled={guardando}>
               {guardando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Agendar Turno
+              {turno ? "Guardar Cambios" : "Agendar Turno"}
             </Button>
           </DialogFooter>
         </form>

@@ -8,15 +8,16 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Pacientes", to: "/patients", icon: Users },
-  { label: "Historiales", to: "/medical-records", icon: FileText },
+  { label: "Historiales", to: "/medical-records", icon: FileText, soloMedico: true },
   { label: "Agenda", to: "/appointments", icon: CalendarDays },
   { label: "Ganancias", to: "/earnings", icon: Wallet },
 ];
 
 export default function Sidebar({ className, onNavegar }) {
   const { pathname } = useLocation();
-  const { user, inicial, esAdmin } = useSesion();
-  const items = esAdmin ? [...NAV, { label: "Usuarios", to: "/user-roles", icon: Shield }] : NAV;
+  const { user, inicial, esAdmin, esMedico } = useSesion();
+  const visibles = NAV.filter((item) => !item.soloMedico || esMedico);
+  const items = esAdmin ? [...visibles, { label: "Usuarios", to: "/user-roles", icon: Shield }] : visibles;
 
   return (
     <aside

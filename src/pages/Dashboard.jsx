@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import { hoyISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import useSesion from "@/hooks/useSesion";
 
 const ACCESOS = [
   {
@@ -28,6 +29,7 @@ const ACCESOS = [
     tono: "bg-brand-blue/10 text-brand-blue",
     titulo: "Historiales",
     texto: "Consultar registros médicos",
+    soloMedico: true,
   },
 ];
 
@@ -40,6 +42,7 @@ const ALCANCES = [
 ];
 
 export default function Dashboard() {
+  const { esMedico } = useSesion();
   const [stats, setStats] = useState({ total: 0, activos: 0, historiales: 0, turnos: 0 });
   const [cargando, setCargando] = useState(true);
 
@@ -50,7 +53,7 @@ export default function Dashboard() {
         const [total, activos, historiales, turnos] = await Promise.all([
           base44.entities.Paciente.count(),
           base44.entities.Paciente.count({ activo: true }),
-          base44.entities.HistorialClinico.count(),
+          esMedico ? base44.entities.HistorialClinico.count() : 0,
           base44.entities.Turno.count({ fecha: hoyISO() }),
         ]);
         if (vivo) setStats({ total, activos, historiales, turnos });
@@ -61,7 +64,7 @@ export default function Dashboard() {
     return () => {
       vivo = false;
     };
-  }, []);
+  }, [esMedico]);
 
   return (
     <div>
@@ -74,7 +77,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard etiqueta="Total Pacientes" valor={stats.total} icon={Users} to="/patients" tono="teal" cargando={cargando} delay={0} />
         <StatCard etiqueta="Pacientes Activos" valor={stats.activos} icon={Activity} to="/patients" tono="emerald" cargando={cargando} delay={80} />
-        <StatCard etiqueta="Historiales Médicos" valor={stats.historiales} icon={FileText} to="/medical-records" tono="blue" cargando={cargando} delay={160} />
+        {esMedico && <StatCard etiqueta="Historiales Médicos" valor={stats.historiales} icon={FileText} to="/medical-records" tono="blue" cargando={cargando} delay={160} />}
         <StatCard etiqueta="Turnos Hoy" valor={stats.turnos} icon={CalendarDays} to="/appointments" tono="amber" cargando={cargando} delay={240} />
       </div>
 
@@ -82,7 +85,7 @@ export default function Dashboard() {
         <section className="animate-slide-up rounded-2xl border border-border bg-card p-6 shadow-soft">
           <h2 className="font-heading text-base font-semibold text-foreground">Acceso Rápido</h2>
           <div className="mt-4 space-y-2">
-            {ACCESOS.map((acceso) => {
+            {ACCESOS.filter((acceso) => !acceso.soloMedico || esMedico).map((acceso) => {
               const Icon = acceso.icon;
               return (
                 <Link

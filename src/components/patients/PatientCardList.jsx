@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/StatusBadge";
 import { valorODash } from "@/lib/format";
@@ -36,9 +36,9 @@ export default function PatientCardList({ pacientes, onEditar, onEliminar, esAdm
               <Pencil className="mr-2 h-3.5 w-3.5" />
               Editar
             </Button>
-            {esAdmin && (
-              <Button variant="outline" size="icon" onClick={() => onEliminar(paciente)} aria-label="Eliminar paciente">
-                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+            {esAdmin && paciente.activo !== false && (
+              <Button variant="outline" size="icon" onClick={() => onEliminar(paciente)} aria-label="Dar de baja paciente">
+                <UserX className="h-3.5 w-3.5 text-destructive" />
               </Button>
             )}
           </div>

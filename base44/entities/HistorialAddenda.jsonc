@@ -1,0 +1,86 @@
+{
+  "name": "HistorialAddenda",
+  "type": "object",
+  "properties": {
+    "historial": {
+      "type": "string",
+      "description": "Id de la atención (HistorialClinico) que se corrige o amplía"
+    },
+    "paciente": {
+      "type": "string",
+      "description": "Id del paciente"
+    },
+    "medico": {
+      "type": "string",
+      "description": "Id del profesional que firma la addenda"
+    },
+    "medico_nombre": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "texto": {
+      "type": "string"
+    },
+    "adjuntos": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tamano": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "historial",
+    "paciente",
+    "texto"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "data.roles": "medico"
+          }
+        }
+      ]
+    },
+    "update": false,
+    "delete": false
+  }
+}
